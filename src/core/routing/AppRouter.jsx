@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext.js'
 import { Alert, Loading } from '../controls/layout.jsx'
 import { AppShell } from '../layout/AppShell.jsx'
+import { ScreenErrorBoundary } from '../layout/ScreenErrorBoundary.jsx'
 import { getRoutesFor, onRoutesChanged } from './routeRegistry.js'
 
 const cache = new Map()
@@ -36,9 +37,13 @@ export function AppRouter({ enabledModules }) {
               key={entry.path}
               path={entry.path}
               element={
-                <Suspense fallback={<Loading />}>
-                  <Screen />
-                </Suspense>
+                // Keyed by path so navigating away from a failed screen clears the failure
+                // rather than carrying it to the next one.
+                <ScreenErrorBoundary key={entry.path} path={entry.path}>
+                  <Suspense fallback={<Loading />}>
+                    <Screen />
+                  </Suspense>
+                </ScreenErrorBoundary>
               }
             />
           )
