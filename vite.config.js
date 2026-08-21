@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
+import { locatorJs } from './vite-plugin-locatorjs.js'
 
 // The frontend always calls relative /api/... paths. The Kestrel origin lives here
 // and nowhere else, so no component ever hardcodes https://localhost:7xxx.
@@ -11,7 +12,10 @@ export default defineConfig(({ mode }) => {
   const apiOrigin = env.VITE_API_ORIGIN || DEFAULT_API_ORIGIN
 
   return {
-    plugins: [react()],
+    // locatorJs() applies to the dev server only and does nothing to a build — see
+    // vite-plugin-locatorjs.js for why it is a plugin of its own rather than an option
+    // on react().
+    plugins: [locatorJs(), react()],
 
     resolve: {
       alias: {

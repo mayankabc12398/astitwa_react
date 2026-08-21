@@ -83,7 +83,7 @@ export default function EmployeeFormScreen() {
       reportingManagerId: row.reportingManagerId ?? '',
     }),
   })
-
+console.log('record', record)
   const canEdit = has('hr.employee.edit')
   const onLoadFired = useRef(false)
 

@@ -1,0 +1,41 @@
+// Editor configuration only.
+//
+// Vite builds from vite.config.js and ESLint lints from eslint.config.js. Nothing here
+// changes what is produced — it exists so the editor understands the project.
+//
+// What it fixes: without this file VS Code treats each file as its own island, so
+// Go to Definition, Find All References and auto-import work poorly across the project,
+// and the '@' alias that vite.config.js defines is reported as unresolved.
+//
+// `paths` below must stay in step with the `alias` block in vite.config.js. They are the
+// same fact told to two different tools: Vite resolves the alias when it builds, this
+// tells the editor so Ctrl+Click lands in the right file.
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    // React 17+ automatic runtime — matches @vitejs/plugin-react, so JSX needs no
+    // `import React` and the editor does not ask for one.
+    "jsx": "react-jsx",
+
+    "allowJs": true,
+    "resolveJsonModule": true,
+
+    // Off deliberately. This is a JSX project with no type annotations — TypeScript is an
+    // explicit non-goal — so switching type checking on would fill the Problems panel with
+    // errors nobody intends to fix and bury the real ones. Turn it on only if the project
+    // decides to adopt types.
+    "checkJs": false
+  },
+
+  "include": ["src/**/*", "vite.config.js", "eslint.config.js"],
+  "exclude": ["node_modules", "dist"]
+}
