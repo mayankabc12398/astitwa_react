@@ -1,0 +1,135 @@
+/*
+ * Layer 1 design tokens. Every colour, space and radius in the product comes from here.
+ * No CSS-in-JS anywhere; components consume these variables through plain class names.
+ */
+
+:root {
+  /* Palette */
+  --c-bg: #f6f7f9;
+  --c-surface: #ffffff;
+  --c-surface-alt: #f0f2f5;
+  --c-border: #d8dde5;
+  --c-border-strong: #b6bfcc;
+
+  --c-text: #1b2330;
+  --c-text-muted: #5c6675;
+  --c-text-faint: #8b95a5;
+  --c-text-inverse: #ffffff;
+
+  --c-primary: #2f5bd7;
+  --c-primary-hover: #2749ad;
+  --c-primary-soft: #e8eefc;
+
+  --c-danger: #c02b2b;
+  --c-danger-soft: #fdecec;
+  --c-warn: #a86a00;
+  --c-warn-soft: #fdf3e2;
+  --c-ok: #1d7a45;
+  --c-ok-soft: #e7f5ed;
+
+  /* Spacing scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  /* Radius and elevation */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --shadow-1: 0 1px 2px rgba(20, 28, 40, 0.08);
+  --shadow-2: 0 4px 16px rgba(20, 28, 40, 0.12);
+  --shadow-3: 0 12px 40px rgba(20, 28, 40, 0.18);
+
+  /* Type */
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Mono', 'Consolas', 'SF Mono', monospace;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+  --lh-tight: 1.25;
+  --lh-normal: 1.5;
+
+  /* Layout */
+  --nav-width: 232px;
+  --header-height: 56px;
+  --z-toast: 900;
+  --z-modal: 1000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--s-3);
+  line-height: var(--lh-tight);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: var(--fs-2xl);
+}
+h2 {
+  font-size: var(--fs-xl);
+}
+h3 {
+  font-size: var(--fs-lg);
+}
+
+a {
+  color: var(--c-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+/* Screen-reader-only helper, used by the pickList dialog and toasts. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

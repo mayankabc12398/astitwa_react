@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>HrSuite script sandbox</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <!--
+      The client-side script sandbox (section 10.5).
+
+      This page is loaded into <iframe sandbox="allow-scripts">. Because allow-same-origin is
+      deliberately NOT granted, the frame runs on an opaque origin: it cannot read the host
+      page's localStorage, cookies or DOM, and therefore cannot read the JWT. It is served
+      from the frontend root rather than the API so it shares no origin with the token either.
+
+      Everything a script is allowed to do arrives and leaves as a postMessage. There is no
+      fetch, no XHR and no direct database access in here — api.query() is a message the host
+      services with the signed-in user's own permissions.
+    -->
+    <script>
+      ;(function () {
+        'use strict'
+
+        var host = null
+        var scripts = Object.create(null) // hookKey -> [{hookId, body, seqNo, debounceMs}]
+        var pending = Object.create(null) // callId -> {resolve, reject}
+        var nextCallId = 1
+
+        function post(message) {
+          if (host) host.postMessage(message, '*')
+        }
+
+        /** Asks the host to do something on the script's behalf and waits for the answer. */
+        function callHost(target, args) {
+          var callId = 'c' + nextCallId++
+          return new Promise(function (resolve, reject) {
+            pending[callId] = { resolve: resolve, reject: reject }
+            post({ type: 'call', callId: callId, target: target, args: args })
+          })
+        }
+
+        function buildApi() {
+          return Object.freeze({
+            query: function (queryKey, params) {
+              return callHost('api.query', [String(queryKey), params || {}])
+            },
+          })
+        }
+
+        function buildUi() {
+          return Object.freeze({
+            toast: function (message) {
+              return callHost('ui.toast', [String(message)])
+            },
+            error: function (message) {
+              return callHost('ui.error', [String(message)])
+            },
+            confirm: function (options) {
+              return callHost('ui.confirm', [options])
+            },
+            pickList: function (options) {
+              return callHost('ui.pickList', [options])
+            },
+            openScreen: function (route, options) {
+              return callHost('ui.openScreen', [String(route), options || {}])
+            },
+          })
+        }
+
+        var utils = Object.freeze({
+          age: function (dob, asOf) {
+            if (!dob) return 0
+            var birth = new Date(dob)
+            if (isNaN(birth.getTime())) return 0
+            var on = asOf ? new Date(asOf) : new Date()
+            var years = on.getFullYear() - birth.getFullYear()
+            var m = on.getMonth() - birth.getMonth()
+            if (m < 0 || (m === 0 && on.getDate() < birth.getDate())) years--
+            return years < 0 ? 0 : years
+          },
+          formatDate: function (value) {
+            if (!value) return ''
+            var d = new Date(value)
+            if (isNaN(d.getTime())) return ''
+            var mm = String(d.getMonth() + 1)
+            var dd = String(d.getDate())
+            if (mm.length < 2) mm = '0' + mm
+            if (dd.length < 2) dd = '0' + dd
+            return d.getFullYear() + '-' + mm + '-' + dd
+          },
+          round: function (value, digits) {
+            var n = Number(value)
+            if (isNaN(n)) return 0
+            var f = Math.pow(10, digits === undefined ? 2 : digits)
+            return Math.round(n * f) / f
+          },
+          isEmpty: function (value) {
+            if (value === null || value === undefined) return true
+            if (typeof value === 'string') return value.trim().length === 0
+            if (Array.isArray(value)) return value.length === 0
+            return false
+          },
+        })
+
+        // Script bodies are compiled as async functions so `await api.query(...)` reads the
+        // same on the client as it does on the server. new Function() would not allow await.
+        var AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+
+        function buildCtx(payload) {
+          var form = payload && payload.form ? JSON.parse(JSON.stringify(payload.form)) : {}
+          return {
+            hookKey: payload.hookKey,
+            form: form,
+            value: payload.value,
+            response: payload.response,
+            user: payload.user,
+            tenant: payload.tenant,
+            setForm: function (key, value) {
+              if (key && typeof key === 'object') {
+                for (var k in key) {
+                  if (Object.prototype.hasOwnProperty.call(key, k)) form[k] = key[k]
+                }
+              } else {
+                form[key] = value
+              }
+              return form
+            },
+          }
+        }
+
+        /** Runs every script registered for one hook key, in seq order. */
+        async function runHook(payload) {
+          var list = scripts[payload.hookKey] || []
+          var merged = {}
+          var ctx = buildCtx(payload)
+          var api = buildApi()
+          var ui = buildUi()
+
+          for (var i = 0; i < list.length; i++) {
+            var entry = list[i]
+            var started = Date.now()
+
+            try {
+              // The body is compiled fresh each run: a script cannot keep state between
+              // invocations or reach anything the four arguments do not hand it.
+              var fn = new AsyncFunction('ctx', 'api', 'ui', 'utils', '"use strict";\n' + entry.body)
+              var returned = await fn(ctx, api, ui, utils)
+
+              post({
+                type: 'log',
+                hookId: entry.hookId,
+                hookKey: payload.hookKey,
+                status: 'ok',
+                durationMs: Date.now() - started,
+                message: null,
+              })
+
+              if (returned && typeof returned === 'object') {
+                if (returned.cancelSave) merged.cancelSave = true
+                if (returned.cancelNavigation) merged.cancelNavigation = true
+                if (returned.redirectTo) merged.redirectTo = returned.redirectTo
+                if (returned.message) {
+                  merged.message = merged.message ? merged.message + ' ' + returned.message : returned.message
+                }
+              }
+
+              if (merged.cancelSave) break
+            } catch (err) {
+              // A failing script is reported and then treated as absent. The screen carries
+              // on exactly as if no hook had been registered (section 10.5).
+              post({
+                type: 'log',
+                hookId: entry.hookId,
+                hookKey: payload.hookKey,
+                status: 'error',
+                durationMs: Date.now() - started,
+                message: String((err && (err.stack || err.message)) || err),
+              })
+            }
+          }
+
+          merged.form = ctx.form
+          return merged
+        }
+
+        window.addEventListener('message', function (event) {
+          var data = event.data
+          if (!data || typeof data !== 'object') return
+
+          if (data.type === 'init') {
+            host = event.source
+            scripts = Object.create(null)
+            var incoming = data.scripts || []
+            for (var i = 0; i < incoming.length; i++) {
+              var s = incoming[i]
+              if (!scripts[s.hookKey]) scripts[s.hookKey] = []
+              scripts[s.hookKey].push({ hookId: s.hookId, body: s.scriptBody, seqNo: s.seqNo })
+            }
+            for (var key in scripts) {
+              scripts[key].sort(function (a, b) {
+                return a.seqNo - b.seqNo
+              })
+            }
+            post({ type: 'ready' })
+            return
+          }
+
+          if (data.type === 'callResult') {
+            var waiter = pending[data.callId]
+            if (!waiter) return
+            delete pending[data.callId]
+            if (data.ok) waiter.resolve(data.value)
+            else waiter.reject(new Error(data.error || 'The host rejected the call.'))
+            return
+          }
+
+          if (data.type === 'run') {
+            host = event.source
+            runHook(data.payload).then(
+              function (result) {
+                post({ type: 'result', id: data.id, result: result })
+              },
+              function (err) {
+                post({ type: 'result', id: data.id, result: {}, error: String(err && err.message) })
+              },
+            )
+          }
+        })
+      })()
+    </script>
+  </body>
+</html>
