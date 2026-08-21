@@ -9,6 +9,7 @@ import { NumberInput, SelectInput, TextArea, TextInput } from '../../core/contro
 import { Alert, Badge, Card, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
 import { usePagedList } from '../../core/hooks/usePagedList.js'
+import { useBootstrap } from '../../config/ConfigContext.js'
 import { MonacoScriptEditor } from './MonacoScriptEditor.jsx'
 
 const BLANK = {
@@ -35,9 +36,31 @@ const SAMPLE = JSON.stringify(
  * for a live tenant. Every save archives the previous version, so rollback is always one
  * click away.
  */
+/**
+ * Which catalogued page a hook key belongs to, or '' for one that matches none.
+ *
+ * Longest key first, so a screen whose key is a prefix of another cannot claim it.
+ */
+function screenKeyFor(hookKey, screens) {
+  if (!hookKey) return ''
+
+  const match = [...screens]
+    .sort((a, b) => b.key.length - a.key.length)
+    .find((screen) => hookKey === screen.key || hookKey.startsWith(`${screen.key}.`))
+
+  return match ? match.key : ''
+}
+
 export default function ScriptHooksScreen() {
   const ui = useUi()
   const list = usePagedList('/admin/hooks')
+
+  // Saving a script changes what the sandbox should be running. Without this the new
+  // version only reached the browser on the next full page load, so the author tested a
+  // hook, saw nothing happen, and had no way to tell whether the script was wrong or
+  // simply not loaded. refresh() re-fetches the bootstrap payload; App.jsx sees the new
+  // clientHooks array and reinstalls the engine.
+  const { refresh: refreshConfig } = useBootstrap()
 
   const [slots, setSlots] = useState({ hookKeys: [], runTargets: [], screens: [] })
   const [editing, setEditing] = useState(null)
@@ -47,6 +70,11 @@ export default function ScriptHooksScreen() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [history, setHistory] = useState(null)
+
+  // The page the slot list is filtered to. Held as an OVERRIDE, not as the truth: with
+  // nothing picked it is derived from the hook key being edited, so opening an existing
+  // hook lands on the right page without anyone storing that fact twice.
+  const [pickedScreen, setPickedScreen] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -61,6 +89,7 @@ export default function ScriptHooksScreen() {
     setEditing({ ...BLANK })
     setTest(null)
     setError('')
+    setPickedScreen(null)
   }, [])
 
   const openExisting = useCallback(async (row) => {
@@ -69,6 +98,7 @@ export default function ScriptHooksScreen() {
     try {
       const hook = await api.get(`/admin/hooks/${row.hookId}`)
       setEditing({ ...BLANK, ...hook, applyToAllTenants: hook.tenantId === null })
+      setPickedScreen(null)
     } catch (cause) {
       setError(cause?.message ?? 'The hook could not be loaded.')
     }
@@ -105,9 +135,10 @@ export default function ScriptHooksScreen() {
     setError('')
     try {
       await api.post('/admin/hooks', editing)
-      ui.toast('Hook saved.')
+      ui.toast('Hook saved and live.')
       setEditing(null)
       list.refresh()
+      refreshConfig()
     } catch (cause) {
       setError(cause?.message ?? 'The hook could not be saved.')
     } finally {
@@ -120,6 +151,7 @@ export default function ScriptHooksScreen() {
       await api.post(`/admin/hooks/${row.hookId}/active`, { isActive: !row.isActive })
       ui.toast(row.isActive ? 'Hook deactivated.' : 'Hook activated.')
       list.refresh()
+      refreshConfig()
     } catch (cause) {
       ui.error(cause?.message ?? 'The hook could not be updated.')
     }
@@ -147,10 +179,29 @@ export default function ScriptHooksScreen() {
       ui.toast(`Rolled back to version ${version.versionNo}.`)
       setHistory(null)
       list.refresh()
+      refreshConfig()
     } catch (cause) {
       ui.error(cause?.message ?? 'The rollback failed.')
     }
   }
+
+  // With a page in hand the editor offers that page's slots and one concrete slot per
+  // field — 'Gross CTC — on blur' rather than a hr.employee.field.<fieldKey>.onBlur
+  // placeholder to hand-edit. With no page, the full flat list is offered exactly as before,
+  // so a hook key outside the catalogue stays editable.
+  const screens = slots.screens ?? []
+  const screenKey = pickedScreen ?? screenKeyFor(editing?.hookKey, screens)
+  const activeScreen = screens.find((screen) => screen.key === screenKey) ?? null
+
+  const hookPointOptions = activeScreen
+    ? [
+        ...(activeScreen.slots ?? []).map((slot) => ({ value: slot.key, label: slot.label })),
+        ...(activeScreen.fields ?? []).map((field) => ({
+          value: field.slotKey,
+          label: `Field: ${field.label} — on blur`,
+        })),
+      ]
+    : (slots.hookKeys ?? []).map((key) => ({ value: key, label: key }))
 
   const columns = [
     { key: 'hookKey', label: 'Hook point' },
@@ -258,10 +309,26 @@ export default function ScriptHooksScreen() {
           {error && <Alert tone="error">{error}</Alert>}
 
           <div className="form-grid">
+            <Field
+              label="Page"
+              htmlFor="screenKey"
+              hint="Narrows the slots below to the ones that page actually has."
+            >
+              <SelectInput
+                id="screenKey"
+                options={screens.map((screen) => ({ value: screen.key, label: screen.label }))}
+                placeholder="— all pages —"
+                value={screenKey}
+                // Only the filter changes. The hook key is left alone, so choosing a page
+                // can never quietly repoint a hook somebody already saved.
+                onChange={(e) => setPickedScreen(e.target.value)}
+              />
+            </Field>
+
             <Field label="Hook point" required htmlFor="hookKey">
               <SelectInput
                 id="hookKey"
-                options={slots.hookKeys.map((k) => ({ value: k, label: k }))}
+                options={hookPointOptions}
                 placeholder="— choose a slot —"
                 value={editing.hookKey}
                 onChange={(e) => setField('hookKey', e.target.value)}

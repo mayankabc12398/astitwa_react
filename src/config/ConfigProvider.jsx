@@ -74,13 +74,30 @@ export function ConfigProvider({ children }) {
     }
   }, [attempt])
 
+  /** Hard reload: clears what is on screen first. For the error path, where there is
+   *  nothing worth keeping. */
   const reload = useCallback(() => {
     setState(null)
     setError(null)
     setAttempt((n) => n + 1)
   }, [])
 
-  const value = useMemo(() => (state ? { ...state, reload } : null), [state, reload])
+  /**
+   * Silent refresh: fetches again and swaps the payload in, leaving the current screen
+   * mounted.
+   *
+   * This is what makes a configuration change take effect in the session that made it. A
+   * newly saved hook script arrives in clientHooks, App.jsx sees a new array and reinstalls
+   * the sandbox — so "Save and activate" activates, rather than meaning "activated for
+   * whoever logs in next". Clearing state here instead would unmount the admin screen the
+   * user is standing on.
+   */
+  const refresh = useCallback(() => setAttempt((n) => n + 1), [])
+
+  const value = useMemo(
+    () => (state ? { ...state, reload, refresh } : null),
+    [state, reload, refresh],
+  )
 
   if (error) {
     return (

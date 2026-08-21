@@ -15,13 +15,55 @@ const READY_TIMEOUT_MS = 5000
  *      without allow-same-origin), so it cannot read this page's storage. Every server call a
  *      script makes is a message this file turns into an api.query() with the user's own token.
  *
- *   2. A script cannot hang a screen. Each run is raced against a timeout; on expiry the
+ *   2. A script cannot hang a screen. Each run is raced against a clock; on expiry the
  *      failure is logged and an empty result is returned, so the screen behaves as if no hook
- *      existed. A frame that stops answering is torn down and rebuilt.
+ *      existed. A frame that stops answering is torn down and rebuilt. The clock measures
+ *      what the SCRIPT does — it stops while a ui.confirm or ui.pickList is waiting on a
+ *      person, who is allowed to think for longer than the budget.
  *
  *   3. A script cannot draw. ui.pickList and friends are messages serviced by the product's
  *      own components — the script supplies data only (section 10.4).
  */
+/**
+ * A run's clock, which can be stopped.
+ *
+ * The limit exists to stop a script hanging a screen: an endless loop, or a frame that stops
+ * answering. Time a user spends reading a ui.confirm is not that. The script is blocked on a
+ * human, and a human is entitled to take longer than five seconds.
+ *
+ * Counting that time made ui.confirm and ui.pickList unusable for the one thing they exist to
+ * do — the dialog was still open when the sandbox was torn down underneath it, and the hook
+ * was logged as a timeout. So the clock stops while any script is waiting on an answer and
+ * restarts when the answer arrives. Wall-clock time is still bounded for everything the
+ * script does on its own.
+ */
+class RunClock {
+  constructor(budgetMs, onExpire) {
+    this.remaining = budgetMs
+    this.onExpire = onExpire
+    this.timer = null
+    this.startedAt = 0
+  }
+
+  start() {
+    if (this.timer || this.remaining <= 0) return
+    this.startedAt = Date.now()
+    this.timer = setTimeout(this.onExpire, this.remaining)
+  }
+
+  stop() {
+    if (!this.timer) return
+    clearTimeout(this.timer)
+    this.timer = null
+    this.remaining -= Date.now() - this.startedAt
+  }
+
+  cancel() {
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = null
+  }
+}
+
 class HookEngine {
   constructor() {
     this.frame = null
@@ -31,6 +73,8 @@ class HookEngine {
     this.pending = new Map()
     this.nextId = 1
     this.listening = false
+    this.clocks = new Set()
+    this.waitingOnUser = 0
   }
 
   /** @param {Array<{hookId:number, hookKey:string, seqNo:number, scriptBody:string, debounceMs:number|null}>} scripts */
@@ -52,7 +96,7 @@ class HookEngine {
       const frame = await this.ensureFrame()
       const id = `r${this.nextId++}`
 
-      const result = await this.withTimeout(
+      const result = await this.raceWithClock(
         new Promise((resolve, reject) => {
           this.pending.set(id, { resolve, reject })
           frame.contentWindow.postMessage(
@@ -60,8 +104,7 @@ class HookEngine {
             '*',
           )
         }),
-        RUN_TIMEOUT_MS,
-        `Hook ${hookKey} did not answer within ${RUN_TIMEOUT_MS}ms.`,
+        `Hook ${hookKey} spent more than ${RUN_TIMEOUT_MS}ms running, not counting time spent waiting for an answer.`,
       )
 
       return result ?? {}
@@ -196,10 +239,11 @@ class HookEngine {
       case 'ui.error':
         ui.error(args[0])
         return true
+      // These two block on a person. The clock stops for them; see RunClock.
       case 'ui.confirm':
-        return ui.confirm(args[0])
+        return this.whileWaitingForUser(() => ui.confirm(args[0]))
       case 'ui.pickList':
-        return ui.pickList(args[0] ?? {})
+        return this.whileWaitingForUser(() => ui.pickList(args[0] ?? {}))
       case 'ui.openScreen':
         return ui.openScreen(args[0], args[1])
       default:
@@ -229,12 +273,37 @@ class HookEngine {
     }
   }
 
-  withTimeout(promise, ms, message) {
-    let timer
-    const timeout = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(Object.assign(new Error(message), { isTimeout: true })), ms)
+  /** Races a run against a clock that can be stopped while a person is being asked something. */
+  raceWithClock(promise, message) {
+    let clock
+    const expiry = new Promise((_, reject) => {
+      clock = new RunClock(RUN_TIMEOUT_MS, () =>
+        reject(Object.assign(new Error(message), { isTimeout: true })))
+      this.clocks.add(clock)
+      if (this.waitingOnUser === 0) clock.start()
     })
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
+
+    return Promise.race([promise, expiry]).finally(() => {
+      clock.cancel()
+      this.clocks.delete(clock)
+    })
+  }
+
+  /**
+   * Stops every run's clock for the duration of an interactive call.
+   *
+   * Every clock, not just the calling run's: a ui message carries no run id, so there is
+   * nothing to attribute it to. Erring towards not killing a script while a dialog is open is
+   * the right way round — the alternative is tearing down the sandbox with a question still
+   * on screen.
+   */
+  async whileWaitingForUser(work) {
+    if (this.waitingOnUser++ === 0) this.clocks.forEach((clock) => clock.stop())
+    try {
+      return await work()
+    } finally {
+      if (--this.waitingOnUser === 0) this.clocks.forEach((clock) => clock.start())
+    }
   }
 }
 

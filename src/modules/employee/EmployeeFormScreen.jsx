@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../core/auth/AuthContext.js'
 import { Button } from '../../core/controls/Button.jsx'
-import { DateInput, SelectInput, TextInput } from '../../core/controls/inputs.jsx'
+import { DateInput, NumberInput, SelectInput, TextInput } from '../../core/controls/inputs.jsx'
 import { Alert, Card, Loading, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
 import { fieldHookKey, runHook } from '../../core/hooks/hookBridge.js'
@@ -25,6 +25,10 @@ const BLANK = {
   mobile: '',
   email: '',
   employmentStatus: 'Active',
+  grossCtc: '',
+  hra: '',
+  tds: '',
+  netSalary: '',
 }
 
 const FIELDS = [
@@ -38,6 +42,10 @@ const FIELDS = [
   { key: 'mobile', label: 'Mobile' },
   { key: 'email', label: 'Email' },
   { key: 'employmentStatus', label: 'Employment status' },
+  { key: 'grossCtc', label: 'Gross CTC' },
+  { key: 'hra', label: 'HRA' },
+  { key: 'tds', label: 'TDS' },
+  { key: 'netSalary', label: 'Net salary' },
 ]
 
 const STATUS_OPTIONS = [
@@ -120,14 +128,30 @@ export default function EmployeeFormScreen() {
       return
     }
 
+    // A beforeSave hook may have supplied values, so coerce the MERGED form rather than
+    // the raw one — otherwise the conversions below would quietly overwrite whatever the
+    // script returned for these keys.
+    const merged = { ...record.form, ...(before.form ?? {}) }
+
+    // Blank means "not recorded", which is not the same as zero. Send null so the column
+    // stays NULL instead of the record claiming a salary of nought.
+    const money = (value) => {
+      if (value === '' || value === null || value === undefined) return null
+      const parsed = Number(value)
+      return Number.isFinite(parsed) ? parsed : null
+    }
+
     const payload = {
-      ...record.form,
-      ...(before.form ?? {}),
-      departmentId: Number(record.form.departmentId) || null,
-      designationId: Number(record.form.designationId) || null,
-      reportingManagerId: Number(record.form.reportingManagerId) || null,
-      dob: record.form.dob || null,
-      dateOfJoining: record.form.dateOfJoining || null,
+      ...merged,
+      departmentId: Number(merged.departmentId) || null,
+      designationId: Number(merged.designationId) || null,
+      reportingManagerId: Number(merged.reportingManagerId) || null,
+      dob: merged.dob || null,
+      dateOfJoining: merged.dateOfJoining || null,
+      grossCtc: money(merged.grossCtc),
+      hra: money(merged.hra),
+      tds: money(merged.tds),
+      netSalary: money(merged.netSalary),
     }
 
     const saved = await record.save(payload)
@@ -305,6 +329,72 @@ export default function EmployeeFormScreen() {
                 placeholder="— select —"
                 onBlur={() => onFieldBlur('employmentStatus')}
                 {...record.bind('employmentStatus')}
+              />
+            )}
+          </DynamicField>
+
+          {/*
+            Compensation. Every one of these is a DynamicField like the rest, so a tenant
+            that does not want salary on this screen hides them with cfg_field_rule rows —
+            no code change, no build. The labels here are the PRODUCT DEFAULT; a config row
+            overrides them, which is why none of this is hardcoded anywhere else.
+          */}
+          <DynamicField fieldKey="grossCtc" label="Gross CTC" defaultSeq={110} error={record.errors.grossCtc}>
+            {({ id: fieldId, invalid }) => (
+              <NumberInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={!canEdit}
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                onBlur={() => onFieldBlur('grossCtc')}
+                {...record.bind('grossCtc')}
+              />
+            )}
+          </DynamicField>
+
+          <DynamicField fieldKey="hra" label="HRA" defaultSeq={120} error={record.errors.hra}>
+            {({ id: fieldId, invalid }) => (
+              <NumberInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={!canEdit}
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                onBlur={() => onFieldBlur('hra')}
+                {...record.bind('hra')}
+              />
+            )}
+          </DynamicField>
+
+          <DynamicField fieldKey="tds" label="TDS" defaultSeq={130} error={record.errors.tds}>
+            {({ id: fieldId, invalid }) => (
+              <NumberInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={!canEdit}
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                onBlur={() => onFieldBlur('tds')}
+                {...record.bind('tds')}
+              />
+            )}
+          </DynamicField>
+
+          <DynamicField fieldKey="netSalary" label="Net salary" defaultSeq={140} error={record.errors.netSalary}>
+            {({ id: fieldId, invalid }) => (
+              <NumberInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={!canEdit}
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                onBlur={() => onFieldBlur('netSalary')}
+                {...record.bind('netSalary')}
               />
             )}
           </DynamicField>

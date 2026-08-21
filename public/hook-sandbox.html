@@ -163,6 +163,20 @@
                 if (returned.message) {
                   merged.message = merged.message ? merged.message + ' ' + returned.message : returned.message
                 }
+
+                // Fields the script returned, as documented in the script contract:
+                //   return { form: { netSalary: 1234 } }
+                //
+                // These land in ctx.form rather than in merged directly, so the next script
+                // in the chain sees what the previous one decided - the same as if it had
+                // called ctx.setForm(). merged.form is taken from ctx.form below.
+                if (returned.form && typeof returned.form === 'object') {
+                  for (var k in returned.form) {
+                    if (Object.prototype.hasOwnProperty.call(returned.form, k)) {
+                      ctx.form[k] = returned.form[k]
+                    }
+                  }
+                }
               }
 
               if (merged.cancelSave) break
