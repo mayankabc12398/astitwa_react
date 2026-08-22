@@ -97,7 +97,80 @@ async function request(method, path, { body, params, signal } = {}) {
   return envelope && Object.prototype.hasOwnProperty.call(envelope, 'data') ? envelope.data : envelope
 }
 
+/**
+ * A POST whose response is read as it arrives, one server-sent event at a time.
+ *
+ * Written here rather than in the screen that wanted it so the token, the base path and the
+ * 401 handling are the same as every other call — a second place that knows how to reach the
+ * server is a second place to forget one of those.
+ *
+ * fetch rather than EventSource: EventSource cannot carry an Authorization header, and every
+ * endpoint in this product is behind one.
+ *
+ * @param {string} path
+ * @param {object} body
+ * @param {(event: {type: string, text: string}) => void} onEvent
+ */
+export async function stream(path, body, onEvent, { signal } = {}) {
+  const headers = { Accept: 'text/event-stream', 'Content-Type': 'application/json' }
+  const token = getToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  let response
+  try {
+    response = await fetch(buildUrl(path), { method: 'POST', headers, body: JSON.stringify(body), signal })
+  } catch (cause) {
+    if (cause?.name === 'AbortError') throw cause
+    throw new ApiError({ status: 0, code: 'NETWORK', message: 'The server could not be reached.' })
+  }
+
+  if (response.status === 401) onUnauthorized?.()
+
+  if (!response.ok || !response.body) {
+    // A failure arrives as the ordinary envelope, not as events.
+    let envelope = null
+    try {
+      envelope = JSON.parse(await response.text())
+    } catch {
+      envelope = null
+    }
+    throw new ApiError({
+      status: response.status,
+      code: envelope?.error?.code,
+      message: envelope?.error?.message,
+      traceId: envelope?.traceId ?? '',
+    })
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+
+    // Events are separated by a blank line. Anything after the last one is a partial event
+    // and stays in the buffer — dispatching it would hand the caller half a word.
+    const events = buffer.split(/\n\n/)
+    buffer = events.pop() ?? ''
+
+    for (const event of events) {
+      const line = event.split(/\n/).find((l) => l.startsWith('data:'))
+      if (!line) continue
+      try {
+        onEvent(JSON.parse(line.slice(5).trim()))
+      } catch {
+        // A malformed event is skipped rather than ending the stream.
+      }
+    }
+  }
+}
+
 export const api = {
+  stream,
   get: (path, options) => request('GET', path, options),
   post: (path, body, options) => request('POST', path, { ...options, body }),
   put: (path, body, options) => request('PUT', path, { ...options, body }),

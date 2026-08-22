@@ -14,6 +14,7 @@ import { javascriptDefaults } from 'monaco-editor/language/typescript/monaco.con
 import 'monaco-editor/languages/definitions/mysql/register.js'
 import editorWorker from 'monaco-editor/editor/editor.worker.js?worker'
 import jsWorker from 'monaco-editor/language/typescript/ts.worker.js?worker'
+import { AiAssistPanel } from './AiAssistPanel.jsx'
 import './scriptEditor.css'
 
 /*
@@ -241,8 +242,15 @@ export function MonacoScriptEditor({
   height = '360px',
   readOnly = false,
   language = 'javascript',
+  context = '',
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [assistant, setAssistant] = useState(false)
+
+  // What the user has highlighted, mirrored into state so the panel can send it. Held here
+  // rather than read on demand because the editor loses its selection the moment the panel's
+  // textarea takes focus, which is exactly when the question gets asked.
+  const [selection, setSelection] = useState('')
   const [dark, setDark] = useState(readStoredDark)
   const editorRef = useRef(null)
   const caretRef = useRef(null)
@@ -311,6 +319,33 @@ export function MonacoScriptEditor({
    * The editor is focused first: commentLine acts on the current selection, and a selection
    * only exists while the editor holds focus.
    */
+  /**
+   * Puts what the assistant wrote where the caret is.
+   *
+   * Through Monaco's own edit stack rather than by rewriting `value`: an executeEdits edit
+   * is one undo step, so a wrong suggestion is Ctrl+Z away, and the caret stays where the
+   * user left it instead of jumping to the end of the document.
+   */
+  const insertAtCaret = useCallback((text) => {
+    const editor = editorRef.current
+    if (!editor || readOnly) return
+
+    const selectionRange = editor.getSelection()
+    editor.executeEdits('assistant', [{ range: selectionRange, text, forceMoveMarkers: true }])
+    editor.focus()
+  }, [readOnly])
+
+  const replaceAll = useCallback((text) => {
+    const editor = editorRef.current
+    if (!editor || readOnly) return
+
+    const model = editor.getModel()
+    if (!model) return
+
+    editor.executeEdits('assistant', [{ range: model.getFullModelRange(), text, forceMoveMarkers: true }])
+    editor.focus()
+  }, [readOnly])
+
   const commentSelection = () => {
     const editor = editorRef.current
     if (!editor) return
@@ -368,6 +403,15 @@ export function MonacoScriptEditor({
         <button
           type="button"
           className="btn btn--ghost btn--sm"
+          onClick={() => setAssistant((was) => !was)}
+          aria-pressed={assistant}
+          title={assistant ? 'Hide the assistant' : 'Ask the assistant about this code'}
+        >
+          {assistant ? 'Hide AI' : 'AI'}
+        </button>
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
           onClick={toggleTheme}
           aria-pressed={dark}
           title={dark ? 'Switch to the light theme' : 'Switch to the dark theme'}
@@ -385,7 +429,13 @@ export function MonacoScriptEditor({
         </button>
       </div>
 
-      <div className="script-editor__body">
+      <div className={`script-editor__body${assistant ? ' script-editor__body--split' : ''}`}>
+        {/*
+          The editor gets a wrapper of our own because @monaco-editor/react sets width:100%
+          inline on the element it renders. An inline width beats any class, so without this
+          the editor claims the whole row and pushes the assistant off the edge.
+        */}
+        <div className="script-editor__pane">
         <Editor
           height={expanded ? '100%' : height}
           language={language}
@@ -402,6 +452,13 @@ export function MonacoScriptEditor({
             editor.onDidChangeCursorPosition((e) => {
               const node = caretRef.current
               if (node) node.textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`
+            })
+
+            // Only the selected text, and only when there is one — an empty selection sent
+            // as context would have the assistant answering about nothing.
+            editor.onDidChangeCursorSelection((e) => {
+              const model = editor.getModel()
+              setSelection(model && !e.selection.isEmpty() ? model.getValueInRange(e.selection) : '')
             })
 
             // F11 is the browser's own full-screen key. Monaco handles it first while the
@@ -448,6 +505,19 @@ export function MonacoScriptEditor({
           }}
           options={options}
         />
+        </div>
+
+        {assistant && (
+          <AiAssistPanel
+            language={language}
+            code={value}
+            selection={selection}
+            context={context}
+            onInsert={insertAtCaret}
+            onReplace={replaceAll}
+            onClose={() => setAssistant(false)}
+          />
+        )}
       </div>
 
       <div className="script-editor__status">

@@ -48,6 +48,482 @@
 }
 
 /*
+ * Editor and assistant side by side.
+ *
+ * The Monaco element is a plain child rather than a flex item with a width: it sizes itself
+ * from the space left over, and `automaticLayout` in its options is what makes it notice the
+ * panel opening. min-width: 0 on the row is what stops a long line of code from pushing the
+ * panel off the edge — a flex item's default min-width is its content.
+ */
+/*
+ * Editor and assistant, side by side.
+ *
+ * The Monaco element carries an inline width:100%, which no class can outrank, so it lives
+ * inside .script-editor__pane and that is what flexes. min-width: 0 on the pane is what stops
+ * a long line of code from pushing the panel off the edge — a flex item's default minimum is
+ * its own content, which for code is "as wide as the longest line".
+ */
+.script-editor__body--split {
+  display: flex;
+  min-width: 0;
+}
+
+.script-editor__pane {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+}
+
+/*
+ * The assistant.
+ *
+ * Pastels rather than the product's own blues: this panel is the one place in the product
+ * where the content is written by a model rather than by the person reading it, and the
+ * colour saying so is quicker than a label. They are tints of the same hues the rest of the
+ * product uses, kept light enough that the code inside them stays the thing you look at.
+ */
+.ai-panel {
+  --ai-lav: #f0ebff;
+  --ai-lav-line: #dcd0ff;
+  --ai-lav-ink: #5b45a8;
+  --ai-mint: #e6f7ef;
+  --ai-mint-line: #bce6d4;
+  --ai-mint-ink: #1f7a57;
+  --ai-peach: #fff0e4;
+  --ai-peach-line: #ffd7bd;
+  --ai-peach-ink: #a8622a;
+  --ai-sky: #e9f1ff;
+  --ai-sky-line: #c9dcfb;
+  --ai-sky-ink: #2b57a6;
+  --ai-rose: #ffecf1;
+  --ai-rose-line: #ffcedb;
+  --ai-rose-ink: #a83a5c;
+
+  --ai-surface: #fdfcff;
+  --ai-line: var(--ai-lav-line);
+  --ai-ink: var(--c-text);
+  --ai-ink-soft: var(--c-text-muted);
+
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 340px;
+  width: 340px;
+  min-height: 0;
+  border-left: 1px solid var(--ai-line);
+  background: var(--ai-surface);
+  color: var(--ai-ink);
+  font-size: var(--fs-sm);
+}
+
+/* Lavender into sky, so the header reads as one band rather than a stripe of chrome. */
+.ai-panel__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--ai-line);
+  background: linear-gradient(105deg, var(--ai-lav) 0%, var(--ai-sky) 100%);
+  color: var(--ai-lav-ink);
+}
+
+.ai-panel__spark {
+  font-size: var(--fs-md);
+  line-height: 1;
+}
+
+.ai-panel__title {
+  font-size: var(--fs-sm);
+  letter-spacing: 0.01em;
+}
+
+.ai-panel__model {
+  padding: 2px var(--s-2);
+  border-radius: 999px;
+  border: 1px solid var(--ai-mint-line);
+  background: var(--ai-mint);
+  color: var(--ai-mint-ink);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-panel__spacer {
+  flex: 1;
+}
+
+.ai-panel__close {
+  border: 0;
+  background: transparent;
+  color: var(--ai-lav-ink);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  padding: 2px var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.ai-panel__close:hover {
+  background: rgba(91, 69, 168, 0.12);
+}
+
+.ai-panel__thread {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-3);
+  line-height: var(--lh-normal);
+}
+
+/* A dashed lavender card rather than grey text: an empty panel should look ready, not broken. */
+.ai-panel__empty {
+  border: 1px dashed var(--ai-lav-line);
+  border-radius: var(--r-lg);
+  background: var(--ai-lav);
+  color: var(--ai-lav-ink);
+  padding: var(--s-3);
+  font-size: var(--fs-xs);
+}
+
+.ai-panel__error {
+  border: 1px solid var(--ai-rose-line);
+  border-radius: var(--r-md);
+  background: var(--ai-rose);
+  color: var(--ai-rose-ink);
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-xs);
+  margin-top: var(--s-2);
+}
+
+.ai-turn {
+  margin-bottom: var(--s-4);
+}
+
+.ai-turn__who {
+  display: block;
+  margin-bottom: var(--s-1);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-turn--user .ai-turn__who {
+  color: var(--ai-sky-ink);
+}
+
+.ai-turn--model .ai-turn__who {
+  color: var(--ai-lav-ink);
+}
+
+.ai-turn__text {
+  margin: 0 0 var(--s-2);
+  white-space: pre-wrap;
+}
+
+/* The question keeps a tinted bubble; the answer does not, so long answers stay readable. */
+.ai-turn--user .ai-turn__text {
+  border: 1px solid var(--ai-sky-line);
+  background: var(--ai-sky);
+  border-radius: var(--r-lg) var(--r-lg) var(--r-lg) var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  color: var(--ai-sky-ink);
+}
+
+.ai-turn--model .ai-turn__text {
+  padding-left: var(--s-2);
+  border-left: 2px solid var(--ai-lav-line);
+}
+
+/* The answer while it is being written: same shape as a finished one, plus a caret. */
+.ai-turn__text--live {
+  margin-bottom: 0;
+}
+
+.ai-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--ai-lav-ink);
+  animation: ai-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ai-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-caret {
+    animation: none;
+  }
+}
+
+.ai-code {
+  border: 1px solid var(--ai-lav-line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin: var(--s-2) 0 var(--s-3);
+  box-shadow: var(--shadow-1);
+}
+
+.ai-code__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-2);
+  background: var(--ai-lav);
+  border-bottom: 1px solid var(--ai-lav-line);
+  color: var(--ai-lav-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-code__lang {
+  padding: 1px var(--s-2);
+  border-radius: 999px;
+  background: var(--ai-surface);
+  border: 1px solid var(--ai-lav-line);
+}
+
+.ai-code__lines {
+  margin-left: auto;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ai-ink-soft);
+}
+
+.ai-code pre {
+  margin: 0;
+  padding: var(--s-3);
+  overflow-x: auto;
+  background: var(--c-surface);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+}
+
+.ai-code__actions,
+.ai-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.ai-code__actions {
+  padding: var(--s-2);
+  border-top: 1px solid var(--ai-lav-line);
+  background: var(--c-surface-alt);
+}
+
+.ai-panel__actions {
+  padding: 0 var(--s-3) var(--s-3);
+}
+
+/*
+ * One chip, four tints. The colour is a handle, not a warning: nothing here is destructive
+ * enough to earn red, and Replace all — the one that throws work away — is the amber-ish one.
+ */
+.ai-chip {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px var(--s-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+
+.ai-chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+
+.ai-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ai-chip:focus-visible {
+  outline: 2px solid var(--ai-lav-ink);
+  outline-offset: 2px;
+}
+
+.ai-chip--lav {
+  background: var(--ai-lav);
+  border-color: var(--ai-lav-line);
+  color: var(--ai-lav-ink);
+}
+
+.ai-chip--mint {
+  background: var(--ai-mint);
+  border-color: var(--ai-mint-line);
+  color: var(--ai-mint-ink);
+}
+
+.ai-chip--peach {
+  background: var(--ai-peach);
+  border-color: var(--ai-peach-line);
+  color: var(--ai-peach-ink);
+}
+
+.ai-chip--sky {
+  background: var(--ai-sky);
+  border-color: var(--ai-sky-line);
+  color: var(--ai-sky-ink);
+}
+
+/* Three dots, because "Thinking…" tells you the same thing and takes a line to do it. */
+.ai-typing {
+  display: flex;
+  gap: 5px;
+  padding: var(--s-2) 0;
+}
+
+.ai-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ai-lav-line);
+  animation: ai-bounce 1.1s infinite ease-in-out;
+}
+
+.ai-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+  background: var(--ai-mint-line);
+}
+
+.ai-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+  background: var(--ai-peach-line);
+}
+
+@keyframes ai-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* Respect the setting rather than animate anyway; the dots are decoration. */
+@media (prefers-reduced-motion: reduce) {
+  .ai-typing span {
+    animation: none;
+  }
+
+  .ai-chip:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+.ai-panel__ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-top: 1px solid var(--ai-line);
+  background: linear-gradient(0deg, var(--ai-lav) 0%, var(--ai-surface) 100%);
+}
+
+.ai-panel__ask .textarea {
+  border-radius: var(--r-lg);
+  border-color: var(--ai-lav-line);
+  background: var(--c-surface);
+  font-size: var(--fs-sm);
+  resize: none;
+}
+
+.ai-panel__ask .textarea:focus {
+  outline: 2px solid var(--ai-lav-line);
+  outline-offset: 1px;
+  border-color: var(--ai-lav-ink);
+}
+
+.ai-panel__send {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.ai-panel__hint {
+  flex: 1;
+  font-size: 10px;
+  color: var(--ai-ink-soft);
+}
+
+/*
+ * Dark.
+ *
+ * The same hues at low lightness rather than grey: a pastel panel that turns monochrome in
+ * the dark theme loses the one thing the colour was doing. Only the variables change — every
+ * rule above is the single description of the layout.
+ */
+.script-editor--dark .ai-panel {
+  --ai-lav: #322b4a;
+  --ai-lav-line: #453a63;
+  --ai-lav-ink: #c8b8ff;
+  --ai-mint: #233a33;
+  --ai-mint-line: #2f5147;
+  --ai-mint-ink: #8fd9bd;
+  --ai-peach: #3d3128;
+  --ai-peach-line: #574135;
+  --ai-peach-ink: #f0b98d;
+  --ai-sky: #26334a;
+  --ai-sky-line: #354764;
+  --ai-sky-ink: #a8c8ff;
+  --ai-rose: #3d2831;
+  --ai-rose-line: #573742;
+  --ai-rose-ink: #f2a8be;
+
+  --ai-surface: #282c34;
+  --ai-line: #181a1f;
+  --ai-ink: #abb2bf;
+  --ai-ink-soft: #7f848e;
+}
+
+.script-editor--dark .ai-code pre,
+.script-editor--dark .ai-code__actions {
+  background: #21252b;
+  color: #abb2bf;
+}
+
+.script-editor--dark .ai-panel__ask .textarea {
+  background: #21252b;
+  color: #abb2bf;
+  border-color: var(--ai-lav-line);
+}
+
+/*
+ * Narrow hosts — the editor inside a dialog, mostly.
+ *
+ * Below this the two columns leave neither enough room, so the panel goes underneath with a
+ * height of its own instead. Stacking is what keeps the code readable; a 150px-wide editor
+ * beside a 150px-wide chat is two unusable things.
+ */
+@media (max-width: 900px) {
+  .script-editor__body--split {
+    flex-direction: column;
+  }
+
+  .ai-panel {
+    flex: 0 0 auto;
+    width: auto;
+    max-height: 46vh;
+    border-left: 0;
+    border-top: 1px solid var(--ai-line);
+  }
+}
+
+/*
  * Full screen is a class on the same element rather than a portal, so the Monaco instance is
  * never unmounted — expanding keeps the undo history, the cursor and the selection.
  *
@@ -112,4 +588,111 @@
 
 .script-editor--dark .script-editor__bar .btn:disabled {
   color: var(--se-text-muted);
+}
+
+
+/*
+ * "Where this runs" — the panel under the hook editor.
+ *
+ * It reads as a summary rather than as another form: the author has finished filling fields
+ * in by the time their eye reaches it, and what they need here is one sentence they can
+ * check against what they meant. The same pastels as the assistant, so the two blocks in this
+ * dialog belong to each other.
+ */
+.hook-preview {
+  border: 1px solid #dcd0ff;
+  border-radius: var(--r-lg);
+  background: linear-gradient(140deg, #f7f4ff 0%, #f2f7ff 100%);
+  padding: var(--s-3);
+  margin-top: var(--s-4);
+}
+
+.hook-preview--empty {
+  border-style: dashed;
+  color: #5b45a8;
+  font-size: var(--fs-xs);
+}
+
+.hook-preview__head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+
+.hook-preview__title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b45a8;
+}
+
+/* The one line that has to be readable across the room. */
+.hook-preview__sentence {
+  margin: 0 0 var(--s-3);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+}
+
+.hook-preview__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-2) var(--s-3);
+  margin: 0;
+}
+
+.hook-preview__facts dt {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+}
+
+.hook-preview__facts dd {
+  margin: 2px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+}
+
+.hook-preview__facts code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  background: #ffffff;
+  border: 1px solid #dcd0ff;
+  border-radius: var(--r-sm);
+  padding: 1px 4px;
+}
+
+/* Secondary detail on its own line rather than in brackets: it is a fact, not an aside. */
+.hook-preview__route {
+  display: block;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+  font-family: var(--font-mono);
+}
+
+.hook-preview__chain {
+  margin-top: var(--s-3);
+  padding-top: var(--s-2);
+  border-top: 1px dashed #dcd0ff;
+}
+
+.hook-preview__chain ol {
+  margin: var(--s-1) 0 0;
+  padding-left: var(--s-4);
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.hook-preview__warn {
+  margin: var(--s-3) 0 0;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid #ffd7bd;
+  border-radius: var(--r-md);
+  background: #fff0e4;
+  color: #a8622a;
+  font-size: var(--fs-xs);
 }

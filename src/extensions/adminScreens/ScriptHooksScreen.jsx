@@ -10,6 +10,7 @@ import { Alert, Badge, Card, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
 import { usePagedList } from '../../core/hooks/usePagedList.js'
 import { useBootstrap } from '../../config/ConfigContext.js'
+import { HookTargetPreview } from './HookTargetPreview.jsx'
 import { MonacoScriptEditor } from './MonacoScriptEditor.jsx'
 
 const BLANK = {
@@ -73,7 +74,9 @@ export default function ScriptHooksScreen() {
   // hook, saw nothing happen, and had no way to tell whether the script was wrong or
   // simply not loaded. refresh() re-fetches the bootstrap payload; App.jsx sees the new
   // clientHooks array and reinstalls the engine.
-  const { refresh: refreshConfig } = useBootstrap()
+  // menu comes along for the ride: it is where a screen key's route lives, so the preview can
+  // say WHICH page without this file keeping a second list of them.
+  const { refresh: refreshConfig, menu } = useBootstrap()
 
   const [slots, setSlots] = useState({ hookKeys: [], runTargets: [], screens: [] })
   const [editing, setEditing] = useState(null)
@@ -459,6 +462,19 @@ export default function ScriptHooksScreen() {
           <Field label="Sample ctx.form for the test run" htmlFor="sample">
             <TextArea id="sample" rows={5} value={sample} onChange={(e) => setSample(e.target.value)} />
           </Field>
+
+          <HookTargetPreview
+            hookKey={editing.hookKey}
+            runOn={editing.runOn}
+            seqNo={editing.seqNo}
+            debounceMs={editing.debounceMs}
+            applyToAllTenants={editing.applyToAllTenants}
+            isActive={editing.isActive}
+            screens={screens}
+            hookId={editing.hookId}
+            siblings={list.items}
+            menu={menu}
+          />
 
           {test && (
             <Alert tone={test.ok ? 'info' : 'error'}>
