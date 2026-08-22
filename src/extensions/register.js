@@ -23,6 +23,11 @@ registerRoutes([
     load: () => import('./adminScreens/NamedQueriesScreen.jsx'),
   },
   {
+    path: '/admin/apis',
+    permission: 'admin.extensions',
+    load: () => import('./adminScreens/CustomApiScreen.jsx'),
+  },
+  {
     path: '/admin/hook-log',
     permission: 'admin.extensions',
     load: () => import('./adminScreens/HookLogScreen.jsx'),

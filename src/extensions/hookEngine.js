@@ -250,6 +250,13 @@ class HookEngine {
         const [queryKey, params] = args
         return api.post('/ext/query', { queryKey, params: params ?? {} })
       }
+      case 'api.callEndpoint': {
+        // An endpoint written in the API Builder. Same rules as api.query: the script names
+        // it, the host calls it with the user's own token, and the server decides whether
+        // this caller may run it.
+        const [slug, params] = args
+        return api.post(`/x/${encodeURIComponent(String(slug))}`, { params: params ?? {} })
+      }
       case 'ui.toast':
         ui.toast(args[0])
         return true

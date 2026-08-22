@@ -8,6 +8,10 @@ import * as monaco from 'monaco-editor/editor/editor.api.js'
 // AMD/global build does: the contribution EXPORTS its defaults instead. Reaching for
 // monaco.languages.typescript.javascriptDefaults therefore reads undefined and throws.
 import { javascriptDefaults } from 'monaco-editor/language/typescript/monaco.contribution.js'
+// One basic language, not the barrel. 'monaco-editor/esm/vs/basic-languages/monaco.contribution'
+// registers all ninety of them, which is the JavaScript story repeated for languages nothing
+// in this product edits. The API Builder writes MySQL and only MySQL.
+import 'monaco-editor/languages/definitions/mysql/register.js'
 import editorWorker from 'monaco-editor/editor/editor.worker.js?worker'
 import jsWorker from 'monaco-editor/language/typescript/ts.worker.js?worker'
 import './scriptEditor.css'
@@ -24,6 +28,8 @@ self.MonacoEnvironment = {
 }
 
 loader.config({ monaco })
+
+const LANGUAGE_LABELS = { javascript: 'JavaScript', mysql: 'MySQL' }
 
 export const DARK_THEME = 'hrsuite-dark'
 export const LIGHT_THEME = 'vs'
@@ -124,9 +130,13 @@ declare const ctx: {
   setCustom(key: string | Record<string, any>, value?: any): Record<string, any>
 }
 
-/** Registered named queries only. No SQL, no procedure names, no undeclared parameters. */
+/** Registered named queries and API Builder endpoints. A script never supplies SQL itself. */
 declare const api: {
   query(queryKey: string, params?: Record<string, any>): Promise<{
+    ok: boolean, rows: Array<Record<string, any>>, columns: string[], truncated: boolean, error?: string
+  }>
+  /** An endpoint from the API Builder, by its address: callEndpoint('employees-by-department', {...}) */
+  callEndpoint(slug: string, params?: Record<string, any>): Promise<{
     ok: boolean, rows: Array<Record<string, any>>, columns: string[], truncated: boolean, error?: string
   }>
 }
@@ -220,7 +230,18 @@ function readStoredDark() {
   }
 }
 
-export function MonacoScriptEditor({ value, onChange, height = '360px', readOnly = false }) {
+/**
+ * `language` is what the editor is editing, not a cosmetic label: it chooses the tokenizer,
+ * and the IntelliSense contract below is installed for JavaScript alone. A SQL editor that
+ * offered ctx and api completions would be describing a contract SQL does not have.
+ */
+export function MonacoScriptEditor({
+  value,
+  onChange,
+  height = '360px',
+  readOnly = false,
+  language = 'javascript',
+}) {
   const [expanded, setExpanded] = useState(false)
   const [dark, setDark] = useState(readStoredDark)
   const editorRef = useRef(null)
@@ -332,7 +353,7 @@ export function MonacoScriptEditor({ value, onChange, height = '360px', readOnly
         .join(' ')}
     >
       <div className="script-editor__bar">
-        <span className="script-editor__name">JavaScript</span>
+        <span className="script-editor__name">{LANGUAGE_LABELS[language] ?? language}</span>
         {readOnly && <span>read only</span>}
         <span className="script-editor__spacer" />
         <button
@@ -367,7 +388,7 @@ export function MonacoScriptEditor({ value, onChange, height = '360px', readOnly
       <div className="script-editor__body">
         <Editor
           height={expanded ? '100%' : height}
-          defaultLanguage="javascript"
+          language={language}
           theme={theme}
           value={value}
           onChange={handleChange}
@@ -406,7 +427,10 @@ export function MonacoScriptEditor({ value, onChange, height = '360px', readOnly
               editor.getAction('editor.action.blockComment')?.run(),
             )
 
-            if (contractInstalled) return
+            // The contract below describes the four objects a SCRIPT is handed. It has
+            // nothing to say about a SELECT statement, and installing it while SQL is open
+            // would offer completions that are wrong rather than merely unhelpful.
+            if (language !== 'javascript' || contractInstalled) return
             contractInstalled = true
 
             // IntelliSense is a convenience. If the language service is unavailable the editor

@@ -45,6 +45,9 @@
             query: function (queryKey, params) {
               return callHost('api.query', [String(queryKey), params || {}])
             },
+            callEndpoint: function (slug, params) {
+              return callHost('api.callEndpoint', [String(slug), params || {}])
+            },
           })
         }
 
