@@ -5,6 +5,7 @@ import { TextInput } from '../../core/controls/inputs.jsx'
 import { Alert, Card, Loading, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
 import { useRecordForm } from '../../core/hooks/useRecordForm.js'
+import { useScreenHooks } from '../../core/hooks/useScreenHooks.js'
 import { invalidateLookup } from '../../core/hooks/useLookup.js'
 import { ConfigForm, DynamicField } from '../../config/DynamicField.jsx'
 import { useScreenRules } from '../../config/useScreenRules.js'
@@ -28,6 +29,9 @@ export default function DepartmentFormScreen() {
   const record = useRecordForm({ path: '/hr/department', id, blank: BLANK })
   const canEdit = has('hr.department.edit')
 
+  // Every hook slot this screen has. See core/hooks/useScreenHooks.js.
+  const hooks = useScreenHooks(SCREEN_KEY, { record, canEdit })
+
   if (record.loading) return <Loading />
   if (record.loadError) return <Alert tone="error">{record.loadError.message}</Alert>
 
@@ -40,12 +44,22 @@ export default function DepartmentFormScreen() {
       return
     }
 
-    const saved = await record.save()
+    const before = await hooks.beforeSave()
+    if (before.cancelSave) {
+      if (before.message) ui.error(before.message)
+      return
+    }
+
+    const saved = await record.save({ ...record.form, ...(before.form ?? {}) })
     if (!saved) return
 
     invalidateLookup('/hr/department/lookup')
-    ui.toast('Department saved.')
-    navigate('/hr/department')
+
+    const after = await hooks.afterSave(record.form, saved)
+    ui.toast(after.message ?? 'Department saved.')
+
+    if (after.cancelNavigation) return
+    navigate(after.redirectTo ?? '/hr/department')
   }
 
   return (
@@ -58,13 +72,13 @@ export default function DepartmentFormScreen() {
         <ConfigForm screenKey={SCREEN_KEY}>
           <DynamicField fieldKey="deptCode" label="Code" required defaultSeq={10} error={record.errors.deptCode}>
             {({ id: fieldId, invalid }) => (
-              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={!canEdit} {...record.bind('deptCode')} />
+              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={hooks.locked('deptCode')} {...hooks.fieldProps('deptCode')} />
             )}
           </DynamicField>
 
           <DynamicField fieldKey="deptName" label="Name" required defaultSeq={20} error={record.errors.deptName}>
             {({ id: fieldId, invalid }) => (
-              <TextInput id={fieldId} invalid={invalid} maxLength={150} disabled={!canEdit} {...record.bind('deptName')} />
+              <TextInput id={fieldId} invalid={invalid} maxLength={150} disabled={hooks.locked('deptName')} {...hooks.fieldProps('deptName')} />
             )}
           </DynamicField>
         </ConfigForm>

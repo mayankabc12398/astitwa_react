@@ -1,0 +1,101 @@
+/*
+ * Field builder — the few pieces the ported theme does not already carry.
+ *
+ * Everything here is scoped under .nhr-scope and uses the theme's own tokens, so it obeys
+ * the same containment rule as the rest of the imported design system: a selector that
+ * escaped the scope would restyle screens built from src/core/controls.
+ */
+
+/* A short explanatory strip. Used wherever a decision needs a sentence next to it. */
+.nhr-scope .fb-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.nhr-scope .fb-note svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--text-3);
+}
+
+/* ---------- typed-in option list ---------- */
+
+.nhr-scope .fb-options {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  background: var(--surface-2);
+}
+
+.nhr-scope .fb-opt-head,
+.nhr-scope .fb-opt-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px;
+  gap: 8px;
+  align-items: center;
+}
+
+.nhr-scope .fb-opt-head.is-cascading,
+.nhr-scope .fb-opt-row.is-cascading {
+  grid-template-columns: 1fr 1fr 1fr 120px;
+}
+
+.nhr-scope .fb-opt-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+
+.nhr-scope .fb-opt-row + .fb-opt-row {
+  margin-top: 6px;
+}
+
+.nhr-scope .fb-opt-actions {
+  display: flex;
+  gap: 2px;
+}
+
+@media (max-width: 640px) {
+  .nhr-scope .fb-opt-head {
+    display: none;
+  }
+  .nhr-scope .fb-opt-row,
+  .nhr-scope .fb-opt-row.is-cascading {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- data-source binder ---------- */
+
+.nhr-scope .fb-binder {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  background: var(--surface-2);
+}
+
+/* The sample rows a probe returned. Capped in height: it is evidence that the source
+   works, not a data grid, and a tall one would push the pickers off the dialog. */
+.nhr-scope .fb-probe {
+  margin-top: 12px;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  background: var(--surface);
+}
+
+.nhr-scope .fb-probe .table {
+  font-size: 12px;
+}

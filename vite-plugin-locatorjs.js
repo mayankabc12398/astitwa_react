@@ -1,7 +1,8 @@
 import { transformAsync } from '@babel/core'
+import locatorJsxModule from '@locator/babel-jsx/dist/index.js'
 
-const REGISTRY_OPEN = 'window.__LOCATOR_DATA__['
-const ATTRIBUTE_OPEN = 'data-locatorjs-id={'
+/** CJS with `exports.default`; Node's interop hands back the whole module object. */
+const locatorJsxPlugin = locatorJsxModule.default ?? locatorJsxModule
 
 /**
  * Makes the LocatorJS browser extension work on this project.
@@ -43,95 +44,66 @@ export function locatorJs() {
         sourceMaps: true,
         // Parse JSX, but transform nothing: the only plugin is the one adding attributes.
         parserOpts: { plugins: ['jsx'] },
-        plugins: [['@locator/babel-jsx/dist', { env: 'development' }]],
+        plugins: [[withPosixPaths(locatorJsxPlugin), { env: 'development' }]],
       })
 
       if (!result?.code) return null
-      return { code: repairRegistryKey(result.code), map: result.map }
+      return { code: result.code, map: result.map }
     },
   }
 }
 
+const toPosix = (p) => (typeof p === 'string' ? p.split('\\').join('/') : p)
+
 /**
- * Repairs the lookup key the Babel plugin writes, which is corrupt on Windows.
+ * Wraps the LocatorJS Babel plugin so it only ever sees forward-slash paths.
  *
- * The plugin emits its registry by building a line of SOURCE TEXT and re-parsing it, with
- * the filename dropped in unescaped:
+ * The plugin emits its registry by building a line of SOURCE TEXT and re-parsing it, with the
+ * file path dropped in unescaped:
  *
  *     window.__LOCATOR_DATA__["D:\Astitwa\react\src\...\Employee.jsx"] = { ... }
  *
- * On a POSIX path that is harmless. On a Windows path those are read as escape sequences and
- * eaten, so the key that comes out is not the key that went in — here it became
- * "D:Astitwa" followed by a mangled tail, while the attribute on the element still read the
- * real path. The extension looks the element up, misses, and reports "No source info found
- * for this element!" with everything apparently wired correctly. A path containing a
- * backslash followed by u or x is worse: it fails to parse at all and the file errors.
+ * On a POSIX path that is harmless. A Windows path is read as escape sequences and eaten, so
+ * the key that comes out is not the key that went in — it became "D:Astitwa" and a mangled
+ * tail while the attribute on the element still held the real path. The extension looks the
+ * element up, misses, and reports "No source info found for this element!" with everything
+ * apparently wired correctly. Worse, a path containing a backslash followed by u or x — say
+ * src\config\nhr\ui\charts.jsx — is not merely mangled: it fails to parse, and the file dies
+ * with "Bad character escape sequence".
  *
- * Only the key is affected. filePath and projectPath inside the object are written as proper
- * escaped strings, and so is the attribute — that one is built as a syntax node rather than
- * as text. So the attribute is treated as the truth and the key is rewritten from it, which
- * makes the two agree by construction rather than by luck.
+ * The path cannot be fixed on the way in. Babel resolves `filename` to an absolute path with
+ * `path.resolve`, which on Windows returns backslashes whatever we hand it, and `cwd` comes
+ * from process.cwd(). Nor can the output be repaired afterwards: when the path breaks the
+ * parse, the plugin throws and there is no output to repair.
  *
- * Deliberately done by scanning rather than by regex: every pattern that could express this
- * needs escaped backslashes inside a character class, which is the same hazard that caused
- * the bug.
+ * So the paths are rewritten on the plugin's own PluginPass, which Babel creates one of per
+ * plugin, at the single point the plugin reads them — Program.enter, where it builds the
+ * record every path in the file is later derived from. Nothing outside this plugin sees the
+ * change; `state.file.opts` is left alone, so error messages and source maps still carry the
+ * real path.
+ *
+ * Forward slashes are what the extension wants anyway: it pastes the path into an editor URL
+ * (vscode://file/D:/Astitwa/react/src/...), which takes them on Windows.
  */
-function repairRegistryKey(code) {
-  const registryAt = code.indexOf(REGISTRY_OPEN)
-  if (registryAt === -1) return code
+function withPosixPaths(pluginFactory) {
+  return (babel, ...rest) => {
+    const plugin = pluginFactory(babel, ...rest)
+    const program = plugin.visitor?.Program
+    if (!program?.enter) return plugin
 
-  const keyStart = registryAt + REGISTRY_OPEN.length
-  const keyEnd = code.indexOf(']', keyStart)
-  if (keyEnd === -1) return code
-
-  const path = firstAttributePath(code)
-  if (path === null) return code
-
-  return code.slice(0, keyStart) + JSON.stringify(path) + code.slice(keyEnd)
-}
-
-/**
- * Reads the path out of the first data-locatorjs-id={"...::0"} in the file.
- * Returns null if there is none, or if it is not the shape expected.
- */
-function firstAttributePath(code) {
-  const at = code.indexOf(ATTRIBUTE_OPEN)
-  if (at === -1) return null
-
-  const literalStart = at + ATTRIBUTE_OPEN.length
-  if (code[literalStart] !== '"') return null
-
-  const literal = readStringLiteral(code, literalStart)
-  if (literal === null) return null
-
-  const cut = literal.lastIndexOf('::')
-  return cut === -1 ? literal : literal.slice(0, cut)
-}
-
-/** Reads one double-quoted JS string literal starting at `start`, honouring escapes. */
-function readStringLiteral(code, start) {
-  let i = start + 1
-  let out = ''
-
-  while (i < code.length) {
-    const ch = code[i]
-
-    if (ch === '\\') {
-      out += ch + code[i + 1]
-      i += 2
-      continue
+    return {
+      ...plugin,
+      visitor: {
+        ...plugin.visitor,
+        Program: {
+          ...program,
+          enter(path, state) {
+            state.filename = toPosix(state.filename)
+            state.cwd = toPosix(state.cwd)
+            return program.enter.call(this, path, state)
+          },
+        },
+      },
     }
-    if (ch === '"') {
-      try {
-        return JSON.parse('"' + out + '"')
-      } catch {
-        return null
-      }
-    }
-
-    out += ch
-    i += 1
   }
-
-  return null
 }

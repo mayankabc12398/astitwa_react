@@ -109,23 +109,36 @@
 
         function buildCtx(payload) {
           var form = payload && payload.form ? JSON.parse(JSON.stringify(payload.form)) : {}
+
+          // The tenant's own fields, from cfg_custom_field, kept in their own bag rather
+          // than merged into ctx.form. A tenant is free to name a custom field 'mobile', and
+          // merging would let it silently shadow the compiled field of that name — the kind
+          // of collision that only shows up as a wrong value on somebody's record.
+          var custom = payload && payload.custom ? JSON.parse(JSON.stringify(payload.custom)) : {}
+
+          function assign(bag) {
+            return function (key, value) {
+              if (key && typeof key === 'object') {
+                for (var k in key) {
+                  if (Object.prototype.hasOwnProperty.call(key, k)) bag[k] = key[k]
+                }
+              } else {
+                bag[key] = value
+              }
+              return bag
+            }
+          }
+
           return {
             hookKey: payload.hookKey,
             form: form,
+            custom: custom,
             value: payload.value,
             response: payload.response,
             user: payload.user,
             tenant: payload.tenant,
-            setForm: function (key, value) {
-              if (key && typeof key === 'object') {
-                for (var k in key) {
-                  if (Object.prototype.hasOwnProperty.call(key, k)) form[k] = key[k]
-                }
-              } else {
-                form[key] = value
-              }
-              return form
-            },
+            setForm: assign(form),
+            setCustom: assign(custom),
           }
         }
 
@@ -164,6 +177,20 @@
                   merged.message = merged.message ? merged.message + ' ' + returned.message : returned.message
                 }
 
+                // Fields the script wants locked on screen:
+                //   return { readOnly: ['hra', 'netSalary'] }
+                //
+                // Unioned across the chain rather than replaced, so one script cannot
+                // silently unlock what an earlier one locked. A field is unlocked by not
+                // being asked for, which is the only way that composes.
+                if (Array.isArray(returned.readOnly)) {
+                  if (!merged.readOnly) merged.readOnly = []
+                  for (var r = 0; r < returned.readOnly.length; r++) {
+                    var key = String(returned.readOnly[r])
+                    if (merged.readOnly.indexOf(key) === -1) merged.readOnly.push(key)
+                  }
+                }
+
                 // Fields the script returned, as documented in the script contract:
                 //   return { form: { netSalary: 1234 } }
                 //
@@ -174,6 +201,16 @@
                   for (var k in returned.form) {
                     if (Object.prototype.hasOwnProperty.call(returned.form, k)) {
                       ctx.form[k] = returned.form[k]
+                    }
+                  }
+                }
+
+                // The same treatment for the tenant's own fields:
+                //   return { custom: { bloodGroup: 'O+' } }
+                if (returned.custom && typeof returned.custom === 'object') {
+                  for (var ck in returned.custom) {
+                    if (Object.prototype.hasOwnProperty.call(returned.custom, ck)) {
+                      ctx.custom[ck] = returned.custom[ck]
                     }
                   }
                 }
@@ -195,6 +232,7 @@
           }
 
           merged.form = ctx.form
+          merged.custom = ctx.custom
           return merged
         }
 

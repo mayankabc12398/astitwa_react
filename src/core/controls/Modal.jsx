@@ -8,6 +8,22 @@ export function Modal({ title, onClose, children, footer, narrow = false, closeO
   const dialogRef = useRef(null)
   const previouslyFocused = useRef(null)
 
+  /*
+   * onClose is read through a ref so the effect below can depend on nothing.
+   *
+   * Callers write onClose={() => setThing(null)}, which is a new function on every render.
+   * With onClose in the dependency list the whole effect tore down and re-ran on every
+   * keystroke in the dialog — and re-running it moves focus to the first focusable element,
+   * which is the header's close button. Typing anywhere in a dialog therefore jumped the
+   * caret to the ✕ after each character.
+   *
+   * Opening focus belongs to the moment the dialog opens, so the effect now runs once.
+   */
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     previouslyFocused.current = document.activeElement
 
@@ -20,7 +36,7 @@ export function Modal({ title, onClose, children, footer, narrow = false, closeO
     function onKeyDown(e) {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose?.()
+        onCloseRef.current?.()
         return
       }
       if (e.key !== 'Tab' || !node) return
@@ -47,7 +63,7 @@ export function Modal({ title, onClose, children, footer, narrow = false, closeO
       document.removeEventListener('keydown', onKeyDown, true)
       previouslyFocused.current?.focus?.()
     }
-  }, [onClose])
+  }, [])
 
   return (
     <div

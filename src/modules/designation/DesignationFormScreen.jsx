@@ -5,6 +5,7 @@ import { TextInput } from '../../core/controls/inputs.jsx'
 import { Alert, Card, Loading, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
 import { useRecordForm } from '../../core/hooks/useRecordForm.js'
+import { useScreenHooks } from '../../core/hooks/useScreenHooks.js'
 import { invalidateLookup } from '../../core/hooks/useLookup.js'
 import { ConfigForm, DynamicField } from '../../config/DynamicField.jsx'
 import { useScreenRules } from '../../config/useScreenRules.js'
@@ -28,6 +29,9 @@ export default function DesignationFormScreen() {
 
   const record = useRecordForm({ path: '/hr/designation', id, blank: BLANK })
   const canEdit = has('hr.designation.edit')
+
+  // Every hook slot this screen has. See core/hooks/useScreenHooks.js.
+  const hooks = useScreenHooks(SCREEN_KEY, { record, canEdit })
 
   if (record.loading) return <Loading />
   if (record.loadError) return <Alert tone="error">{record.loadError.message}</Alert>
@@ -59,19 +63,19 @@ export default function DesignationFormScreen() {
         <ConfigForm screenKey={SCREEN_KEY}>
           <DynamicField fieldKey="desigCode" label="Code" required defaultSeq={10} error={record.errors.desigCode}>
             {({ id: fieldId, invalid }) => (
-              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={!canEdit} {...record.bind('desigCode')} />
+              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={hooks.locked('desigCode')} {...hooks.fieldProps('desigCode')} />
             )}
           </DynamicField>
 
           <DynamicField fieldKey="desigName" label="Name" required defaultSeq={20} error={record.errors.desigName}>
             {({ id: fieldId, invalid }) => (
-              <TextInput id={fieldId} invalid={invalid} maxLength={150} disabled={!canEdit} {...record.bind('desigName')} />
+              <TextInput id={fieldId} invalid={invalid} maxLength={150} disabled={hooks.locked('desigName')} {...hooks.fieldProps('desigName')} />
             )}
           </DynamicField>
 
           <DynamicField fieldKey="grade" label="Grade" defaultSeq={30} error={record.errors.grade}>
             {({ id: fieldId, invalid }) => (
-              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={!canEdit} {...record.bind('grade')} />
+              <TextInput id={fieldId} invalid={invalid} maxLength={40} disabled={hooks.locked('grade')} {...hooks.fieldProps('grade')} />
             )}
           </DynamicField>
         </ConfigForm>

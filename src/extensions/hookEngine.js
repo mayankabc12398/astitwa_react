@@ -88,6 +88,23 @@ class HookEngine {
     return this.hookKeys.has(hookKey)
   }
 
+  /**
+   * The longest debounce any script on this key asked for, or 0 for none.
+   *
+   * The longest rather than the shortest: the scripts on one key run as a chain, so the wait
+   * has to satisfy every one of them. Honouring the shortest would run a script that asked
+   * for a second's quiet after 200ms, which is the setting not working.
+   */
+  debounceFor(hookKey) {
+    let longest = 0
+    for (const script of this.scripts) {
+      if (script.hookKey !== hookKey) continue
+      const ms = Number(script.debounceMs) || 0
+      if (ms > longest) longest = ms
+    }
+    return longest
+  }
+
   async run(hookKey, context = {}) {
     // The common case is no script at all. Do not spin up a frame for it.
     if (!this.hasScriptFor(hookKey)) return {}

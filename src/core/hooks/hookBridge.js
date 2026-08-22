@@ -22,7 +22,7 @@ export function hasHookEngine() {
 /**
  * @param {string} hookKey e.g. 'hr.employee.beforeSave'
  * @param {object} context { form, value, response }
- * @returns {Promise<{cancelSave?: boolean, cancelNavigation?: boolean, redirectTo?: string, message?: string, form?: object}>}
+ * @returns {Promise<{cancelSave?: boolean, cancelNavigation?: boolean, redirectTo?: string, message?: string, form?: object, readOnly?: string[]}>}
  */
 export async function runHook(hookKey, context = {}) {
   if (!engine) return {}
@@ -37,7 +37,24 @@ export async function runHook(hookKey, context = {}) {
   }
 }
 
-/** hr.employee.field.<fieldKey>.onBlur */
-export function fieldHookKey(screenKey, fieldKey) {
-  return `${screenKey}.field.${fieldKey}.onBlur`
+/**
+ * hr.employee.field.<fieldKey>.<event>
+ *
+ * The event defaults to onBlur, which is the only one screens fired before onChange existed.
+ * A key built without one has to keep meaning what it always meant.
+ */
+export function fieldHookKey(screenKey, fieldKey, event = 'onBlur') {
+  return `${screenKey}.field.${fieldKey}.${event}`
+}
+
+/**
+ * How long a screen should wait before running a hook, from the hook's own debounce_ms.
+ *
+ * Only onChange slots have any use for this: onBlur already fires once per visit to a field,
+ * whereas onChange fires per keystroke, and a script that queries the server on every letter
+ * typed is a script nobody can use. 0 means run immediately, which is also what an absent
+ * engine returns — a screen with no Layer 5 loaded behaves as it always did.
+ */
+export function hookDebounceMs(hookKey) {
+  return engine?.debounceFor?.(hookKey) ?? 0
 }

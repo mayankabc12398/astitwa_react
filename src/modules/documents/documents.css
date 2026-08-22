@@ -1,0 +1,74 @@
+/*
+ * Documents Center — the few pieces the ported theme does not already carry.
+ *
+ * Scoped under .nhr-scope and built from the theme's own tokens, so it obeys the same
+ * containment rule as the rest of the imported design system.
+ */
+
+/* The document library. Four across on a wide screen, degrading rather than squeezing. */
+.nhr-scope .dc-type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1180px) {
+  .nhr-scope .dc-type-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .nhr-scope .dc-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .nhr-scope .dc-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The analytics strip: a wide chart beside a narrow summary. */
+.nhr-scope .dc-two {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1000px) {
+  .nhr-scope .dc-two {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*
+ * The issue dialog: the form beside the letter it produces. The preview is what makes the
+ * template choice obvious, so it keeps its own column until there is genuinely no room —
+ * below that it drops underneath rather than being squeezed into illegibility.
+ */
+.nhr-scope .dc-issue {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.nhr-scope .dc-issue-preview {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+
+@media (max-width: 940px) {
+  .nhr-scope .dc-issue {
+    grid-template-columns: 1fr;
+  }
+  .nhr-scope .dc-issue-preview {
+    position: static;
+  }
+}

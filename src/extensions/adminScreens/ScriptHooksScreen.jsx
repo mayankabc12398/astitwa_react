@@ -41,6 +41,19 @@ const SAMPLE = JSON.stringify(
  *
  * Longest key first, so a screen whose key is a prefix of another cannot claim it.
  */
+/**
+ * Splits hr.employee.field.grossCtc.onChange into its slot and its event.
+ *
+ * Returns empty strings for anything that is not a field slot, which is how the editor tells
+ * whether the event dropdown applies at all. Deliberately anchored on '.field.' rather than
+ * on "the last two segments": hr.employee.beforeSave would otherwise read as a field called
+ * employee with an event called beforeSave.
+ */
+function splitFieldSlot(hookKey) {
+  const match = /^(.*\.field\.[^.]+)\.([^.]+)$/.exec(hookKey ?? '')
+  return match ? { base: match[1], event: match[2] } : { base: '', event: '' }
+}
+
 function screenKeyFor(hookKey, screens) {
   if (!hookKey) return ''
 
@@ -193,15 +206,43 @@ export default function ScriptHooksScreen() {
   const screenKey = pickedScreen ?? screenKeyFor(editing?.hookKey, screens)
   const activeScreen = screens.find((screen) => screen.key === screenKey) ?? null
 
+  /*
+   * The hook key is the single source of truth; both dropdowns read it and write it back.
+   *
+   * A field slot is offered WITHOUT its event — 'Field: Gross CTC' — and the event dropdown
+   * beside it supplies the rest. Baking the event into the slot list would need one entry per
+   * field per event, which is the same fourteen fields listed twice.
+   */
+  const fieldEvents = slots.fieldEvents ?? []
+  const defaultEvent = fieldEvents[0]?.key ?? 'onBlur'
+  const fieldSlot = splitFieldSlot(editing?.hookKey)
+  const hookPointValue = fieldSlot.base || editing?.hookKey || ''
+
   const hookPointOptions = activeScreen
     ? [
         ...(activeScreen.slots ?? []).map((slot) => ({ value: slot.key, label: slot.label })),
+        // A custom field is one a tenant added through Field Builder rather than one the
+        // product ships. Saying so matters: it can be renamed or removed by whoever added
+        // it, and the hook hanging off it would then be pointing at nothing.
         ...(activeScreen.fields ?? []).map((field) => ({
-          value: field.slotKey,
-          label: `Field: ${field.label} — on blur`,
+          value: field.slotBase ?? `${activeScreen.key}.field.${field.key}`,
+          label: field.source === 'custom' ? `Field: ${field.label} (custom)` : `Field: ${field.label}`,
         })),
       ]
     : (slots.hookKeys ?? []).map((key) => ({ value: key, label: key }))
+
+  // A key typed by hand, or one saved before a screen was catalogued, is not in the list
+  // above. Offering it keeps the dropdown showing what is actually being edited instead of
+  // falling blank and looking as though nothing was chosen.
+  const hookPointChoices = hookPointOptions.some((o) => o.value === hookPointValue)
+    ? hookPointOptions
+    : [...hookPointOptions, ...(hookPointValue ? [{ value: hookPointValue, label: hookPointValue }] : [])]
+
+  /** Picking a slot keeps whichever event is already chosen, so switching field is one click. */
+  const setHookPoint = (value) => {
+    const isField = /\.field\.[^.]+$/.test(value)
+    setField('hookKey', isField ? `${value}.${fieldSlot.event || defaultEvent}` : value)
+  }
 
   const columns = [
     { key: 'hookKey', label: 'Hook point' },
@@ -328,17 +369,36 @@ export default function ScriptHooksScreen() {
             <Field label="Hook point" required htmlFor="hookKey">
               <SelectInput
                 id="hookKey"
-                options={hookPointOptions}
+                options={hookPointChoices}
                 placeholder="— choose a slot —"
-                value={editing.hookKey}
-                onChange={(e) => setField('hookKey', e.target.value)}
+                value={hookPointValue}
+                onChange={(e) => setHookPoint(e.target.value)}
+              />
+            </Field>
+
+            <Field
+              label="Field event"
+              htmlFor="fieldEvent"
+              hint={
+                fieldSlot.base
+                  ? 'On change runs as the value is typed; use the debounce below.'
+                  : 'Only a field slot has an event.'
+              }
+            >
+              <SelectInput
+                id="fieldEvent"
+                options={fieldEvents.map((e) => ({ value: e.key, label: e.label }))}
+                placeholder="— not a field slot —"
+                disabled={!fieldSlot.base}
+                value={fieldSlot.event}
+                onChange={(e) => setField('hookKey', `${fieldSlot.base}.${e.target.value}`)}
               />
             </Field>
 
             <Field
               label="Hook key (free text)"
               htmlFor="hookKeyText"
-              hint="Field slots take a field name, e.g. hr.employee.field.mobile.onBlur"
+              hint="What actually runs. The two dropdowns above write it, and editing it here moves them."
             >
               <TextInput id="hookKeyText" value={editing.hookKey} onChange={(e) => setField('hookKey', e.target.value)} />
             </Field>
@@ -357,7 +417,11 @@ export default function ScriptHooksScreen() {
               <NumberInput id="seqNo" value={editing.seqNo} onChange={(e) => setField('seqNo', Number(e.target.value))} />
             </Field>
 
-            <Field label="Debounce (ms)" htmlFor="debounceMs" hint="Field hooks only. Leave blank for none.">
+            <Field
+              label="Debounce (ms)"
+              htmlFor="debounceMs"
+              hint="On change only — how long typing must pause first. Blank runs on every keystroke."
+            >
               <NumberInput
                 id="debounceMs"
                 value={editing.debounceMs ?? ''}
@@ -388,9 +452,8 @@ export default function ScriptHooksScreen() {
           </div>
 
           <Field label="Script" htmlFor="scriptBody">
-            <div style={{ border: '1px solid var(--c-border)', borderRadius: 'var(--r-md)', overflow: 'hidden' }}>
-              <MonacoScriptEditor value={editing.scriptBody} onChange={(next) => setField('scriptBody', next)} />
-            </div>
+            {/* The editor draws its own frame — it has to keep one in full screen too. */}
+            <MonacoScriptEditor value={editing.scriptBody} onChange={(next) => setField('scriptBody', next)} />
           </Field>
 
           <Field label="Sample ctx.form for the test run" htmlFor="sample">

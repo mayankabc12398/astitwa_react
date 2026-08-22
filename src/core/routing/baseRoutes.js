@@ -59,5 +59,35 @@ export function registerBaseRoutes() {
       permission: 'hr.leave.view',
       load: () => import('../../modules/leave/LeaveFormScreen.jsx'),
     },
+    // One screen serves both paths: the register is the page, and a document opens in a
+    // drawer over it. The :id form exists so a document can be linked to directly.
+    {
+      path: '/hr/documents',
+      permission: 'hr.document.view',
+      load: () => import('../../modules/documents/DocumentsCenterScreen.jsx'),
+    },
+    {
+      path: '/hr/documents/:id',
+      permission: 'hr.document.view',
+      load: () => import('../../modules/documents/DocumentsCenterScreen.jsx'),
+    },
+    // Administrative screens. Reading a template or a field definition is not gated on
+    // these — every form that renders one needs to, and each is already behind its own
+    // screen's permission.
+    {
+      path: '/hr/print-designer',
+      permission: 'admin.printTemplate',
+      load: () => import('../../modules/printDesigner/PrintDesignerScreen.jsx'),
+    },
+    {
+      path: '/hr/print-designer/:id',
+      permission: 'admin.printTemplate',
+      load: () => import('../../modules/printDesigner/PrintDesignerScreen.jsx'),
+    },
+    {
+      path: '/hr/field-builder',
+      permission: 'admin.customField',
+      load: () => import('../../modules/fieldBuilder/FieldBuilderScreen.jsx'),
+    },
   ])
 }

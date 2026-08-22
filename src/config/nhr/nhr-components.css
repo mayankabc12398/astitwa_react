@@ -1,0 +1,1908 @@
+/* Generated from Aurora HR source CSS — every rule scoped under .nhr-scope, keyframes prefixed nhr-. Do not let selectors escape the scope. */
+/* ============================================================
+   AURORA HR — Shared Component Styles
+   ============================================================ */
+
+/* ================= Buttons ================= */
+.nhr-scope .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 16px; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600; line-height: 1;
+  border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  position: relative; overflow: hidden; user-select: none;
+}
+
+.nhr-scope .btn:active { transform: scale(0.97); }
+
+.nhr-scope .btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+
+.nhr-scope .btn:disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+
+.nhr-scope .btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-600)); color: #fff; box-shadow: 0 1px 2px rgba(85, 96, 232, 0.35), 0 4px 12px rgba(85, 96, 232, 0.22); }
+
+.nhr-scope .btn-primary:hover { background: linear-gradient(180deg, var(--primary-600), var(--primary-700)); box-shadow: 0 2px 4px rgba(85, 96, 232, 0.4), 0 8px 20px rgba(85, 96, 232, 0.3); transform: translateY(-1px); }
+
+
+.nhr-scope .btn-soft { background: var(--primary-soft); color: var(--primary-700); }
+
+.nhr-scope .btn-soft:hover { background: #e2e6fe; transform: translateY(-1px); }
+
+
+.nhr-scope .btn-outline { background: var(--surface); color: var(--text-1); border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+
+.nhr-scope .btn-outline:hover { border-color: #c3ccdd; background: var(--surface-2); transform: translateY(-1px); }
+
+
+.nhr-scope .btn-ghost { background: transparent; color: var(--text-2); }
+
+.nhr-scope .btn-ghost:hover { background: var(--surface-3); color: var(--text-1); }
+
+
+.nhr-scope .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 1px 2px rgba(220, 71, 71, 0.35); }
+
+.nhr-scope .btn-danger:hover { background: #c93a3a; transform: translateY(-1px); }
+
+.nhr-scope .btn-danger-soft { background: var(--danger-soft); color: var(--danger-ink); }
+
+.nhr-scope .btn-danger-soft:hover { background: #fcdada; }
+
+.nhr-scope .btn-success { background: var(--success); color: #fff; box-shadow: 0 1px 2px rgba(24, 154, 84, 0.35); }
+
+.nhr-scope .btn-success:hover { background: #128a49; transform: translateY(-1px); }
+
+.nhr-scope .btn-success-soft { background: var(--success-soft); color: var(--success-ink); }
+
+.nhr-scope .btn-success-soft:hover { background: #ccefdb; }
+
+
+.nhr-scope .btn-sm { padding: 6px 11px; font-size: 12px; border-radius: var(--r-xs); }
+
+.nhr-scope .btn-lg { padding: 12px 22px; font-size: 14px; border-radius: var(--r-md); }
+
+.nhr-scope .btn-icon { padding: 8px; width: 34px; height: 34px; }
+
+.nhr-scope .btn-icon.btn-sm { width: 28px; height: 28px; padding: 5px; }
+
+
+.nhr-scope .btn .ripple-ink {
+  position: absolute; border-radius: 50%; transform: scale(0);
+  background: currentColor; opacity: 0.18; animation: nhr-ripple 550ms var(--ease) forwards;
+  pointer-events: none;
+}
+
+
+/* ================= Cards ================= */
+.nhr-scope .card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.nhr-scope .card-pad { padding: 20px; }
+
+.nhr-scope .card-hover:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--border-strong); }
+
+.nhr-scope .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+
+/* AdminLTE ships `.card-title { float: left; font-size: 1.1rem; margin: 0 }`
+   and Bootstrap adds `.card-title { margin-bottom: .75rem }` in the global
+   bundle. Both match our own markup, and the float makes the sub-line wrap
+   *beside* the title instead of under it. Reset the inherited box here — this
+   is scoped to .nhr-scope, so nothing outside the HR module is touched. */
+.nhr-scope .card-title {
+  display: block; float: none; clear: both; margin: 0;
+  font-size: 14px; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em;
+}
+
+.nhr-scope .card-sub {
+  display: block; float: none; clear: both; margin: 2px 0 0;
+  font-size: 12px; color: var(--text-3);
+}
+
+.nhr-scope .card-body { padding: 20px; }
+
+/* Same story for the card box itself: AdminLTE's `.card` carries a 1rem bottom
+   margin and its own shadow, which double up on our gap-based grids. */
+.nhr-scope .card { margin-bottom: 0; position: relative; }
+
+/* Grid/flex children default to min-width:auto, so a wide chart or a long
+   table pushes the whole page sideways instead of scrolling inside its card. */
+.nhr-scope .kpi-grid > *,
+.nhr-scope .dashboard-two > * { min-width: 0; }
+
+
+.nhr-scope .glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
+
+/* ================= Metric / KPI card ================= */
+.nhr-scope .metric-card {
+  position: relative; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px 20px; box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.nhr-scope .metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.nhr-scope .metric-card .metric-glow {
+  position: absolute; top: -34px; right: -34px; width: 110px; height: 110px;
+  border-radius: 50%; opacity: 0.5; filter: blur(6px); pointer-events: none;
+}
+
+.nhr-scope .metric-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+
+.nhr-scope .metric-value { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: var(--text-1); margin-top: 6px; }
+
+.nhr-scope .metric-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; margin-top: 6px; }
+
+.nhr-scope .metric-icon {
+  width: 40px; height: 40px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+
+.nhr-scope .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+@media (max-width: 1200px) {
+ .nhr-scope .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+ }
+
+@media (max-width: 640px) {
+ .nhr-scope .kpi-grid { grid-template-columns: 1fr; }
+ }
+
+
+/* ================= Badges & chips ================= */
+.nhr-scope .badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: var(--r-full);
+  font-size: 11.5px; font-weight: 600; line-height: 1.4; white-space: nowrap;
+}
+
+/* animation: none guards against host-app global `.dot` rules (e.g. the chat
+   typing indicator) re-animating status-badge dots. */
+.nhr-scope .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; animation: none; }
+
+.nhr-scope .badge-success { background: var(--success-soft); color: var(--success-ink); }
+
+.nhr-scope .badge-warning { background: var(--warning-soft); color: var(--warning-ink); }
+
+.nhr-scope .badge-danger { background: var(--danger-soft); color: var(--danger-ink); }
+
+.nhr-scope .badge-info { background: var(--info-soft); color: var(--info-ink); }
+
+.nhr-scope .badge-pending { background: var(--pending-soft); color: var(--pending-ink); }
+
+.nhr-scope .badge-neutral { background: var(--neutral-soft); color: var(--neutral-ink); }
+
+.nhr-scope .badge-primary { background: var(--primary-soft); color: var(--primary-700); }
+
+
+.nhr-scope .chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: var(--r-full);
+  font-size: 12px; font-weight: 500; background: var(--surface-3);
+  color: var(--text-2); border: 1px solid var(--border);
+  cursor: pointer; transition: all var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .chip:hover { border-color: var(--border-strong); color: var(--text-1); }
+
+.nhr-scope .chip.active { background: var(--primary-soft); border-color: var(--border-focus); color: var(--primary-700); font-weight: 600; }
+
+.nhr-scope .chip .chip-x { display: inline-flex; opacity: 0.6; }
+
+.nhr-scope .chip .chip-x:hover { opacity: 1; }
+
+
+/* ================= Avatar ================= */
+.nhr-scope .avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-weight: 700; color: #fff; flex-shrink: 0;
+  background: var(--primary); user-select: none; letter-spacing: 0.02em;
+}
+
+.nhr-scope .avatar-xs { width: 24px; height: 24px; font-size: 9px; }
+
+.nhr-scope .avatar-sm { width: 30px; height: 30px; font-size: 11px; }
+
+.nhr-scope .avatar-md { width: 38px; height: 38px; font-size: 13px; }
+
+.nhr-scope .avatar-lg { width: 52px; height: 52px; font-size: 18px; }
+
+.nhr-scope .avatar-xl { width: 84px; height: 84px; font-size: 28px; }
+
+.nhr-scope .avatar-ring { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--border-strong); }
+
+.nhr-scope .avatar-stack { display: inline-flex; }
+
+.nhr-scope .avatar-stack .avatar { box-shadow: 0 0 0 2px var(--surface); }
+
+.nhr-scope .avatar-stack .avatar + .avatar { margin-left: -8px; }
+
+
+/* ================= Tabs ================= */
+.nhr-scope .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+
+/* Host app declares global `.tabs`, `.tabs button` and `.tabs button.active`
+   (index.css) with gray backgrounds, padding and width:100% — higher-specificity
+   resets below keep HR tabs on their own underline design. */
+.nhr-scope .tabs { background: transparent; padding: 0; margin-bottom: 0; width: auto; }
+
+.nhr-scope .tabs button { width: auto; }
+
+.nhr-scope .tabs button.active { background: none; border: none; }
+
+/* Host also forces `button { border-radius: 6px !important }` globally —
+   re-assert every HR button radius that differs from 6px. */
+.nhr-scope .tab { border-radius: var(--r-sm) var(--r-sm) 0 0 !important; }
+
+.nhr-scope .tab:focus { outline: none; }
+
+.nhr-scope .tab:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+
+.nhr-scope .btn,
+.nhr-scope .icon-btn { border-radius: var(--r-sm) !important; }
+
+.nhr-scope .btn-lg { border-radius: var(--r-md) !important; }
+
+.nhr-scope .chip { border-radius: var(--r-full) !important; }
+
+.nhr-scope .segmented button { border-radius: 7px !important; }
+
+/* Host forces `td { padding: 0 !important }` and `table td { padding: 0.1rem
+   !important; border-top: none !important }` — re-assert DataTable cell rhythm. */
+.nhr-scope table.data-table tbody td {
+  padding: 11px 14px !important;
+  border-top: none !important;
+  vertical-align: middle !important;
+}
+
+.nhr-scope .tab {
+  position: relative; padding: 10px 16px; font-size: 13px; font-weight: 600;
+  color: var(--text-2); background: none; border: none; cursor: pointer;
+  border-radius: var(--r-sm) var(--r-sm) 0 0; white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+
+.nhr-scope .tab:hover { color: var(--text-1); background: var(--surface-3); }
+
+.nhr-scope .tab.active { color: var(--primary-700); }
+
+.nhr-scope .tab .tab-count {
+  font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: var(--r-full);
+  background: var(--surface-3); color: var(--text-2);
+}
+
+.nhr-scope .tab.active .tab-count { background: var(--primary-soft); color: var(--primary-700); }
+
+.nhr-scope .tab-indicator {
+  position: absolute; bottom: -1px; left: 10px; right: 10px; height: 2.5px;
+  border-radius: 3px 3px 0 0; background: var(--primary);
+  animation: nhr-fadeIn var(--dur-fast) var(--ease);
+}
+
+
+/* Pill tabs (segmented) */
+.nhr-scope .segmented {
+  display: inline-flex; gap: 2px; background: var(--surface-3);
+  border: 1px solid var(--border); border-radius: var(--r-sm); padding: 3px;
+}
+
+.nhr-scope .segmented button {
+  padding: 6px 13px; border: none; background: transparent; border-radius: 7px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  transition: all var(--dur-fast) var(--ease); display: inline-flex; align-items: center; gap: 6px;
+}
+
+.nhr-scope .segmented button:hover { color: var(--text-1); }
+
+.nhr-scope .segmented button.active { background: var(--surface); color: var(--text-1); box-shadow: var(--shadow-sm); }
+
+
+/* ================= Table ================= */
+.nhr-scope .table-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+
+.nhr-scope .table-toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+
+.nhr-scope .table-scroller { overflow: auto; max-height: var(--table-max-h, 640px); }
+
+.nhr-scope table.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+
+.nhr-scope table.data-table thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface-2); color: var(--text-2);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border);
+  white-space: nowrap; user-select: none;
+}
+
+.nhr-scope table.data-table thead th.sortable { cursor: pointer; }
+
+.nhr-scope table.data-table thead th.sortable:hover { color: var(--text-1); background: var(--surface-3); }
+
+.nhr-scope table.data-table tbody td {
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+  color: var(--text-1); vertical-align: middle;
+}
+
+.nhr-scope table.data-table tbody tr { transition: background var(--dur-fast) var(--ease); }
+
+.nhr-scope table.data-table tbody tr:hover { background: var(--primary-softer); }
+
+.nhr-scope table.data-table tbody tr.row-click { cursor: pointer; }
+
+.nhr-scope table.data-table tbody tr:last-child td { border-bottom: none; }
+
+.nhr-scope .table-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+
+
+.nhr-scope .pager { display: flex; align-items: center; gap: 4px; }
+
+.nhr-scope .pager button {
+  min-width: 30px; height: 30px; padding: 0 8px; border-radius: var(--r-xs);
+  border: 1px solid transparent; background: transparent; color: var(--text-2);
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.nhr-scope .pager button:hover:not(:disabled) { background: var(--surface-3); color: var(--text-1); }
+
+.nhr-scope .pager button.active { background: var(--primary); color: #fff; box-shadow: 0 2px 6px rgba(85, 96, 232, 0.35); }
+
+.nhr-scope .pager button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+
+/* ================= Forms ================= */
+.nhr-scope .field { position: relative; display: flex; flex-direction: column; gap: 5px; }
+
+.nhr-scope .field-label { font-size: 12px; font-weight: 600; color: var(--text-2); display: flex; gap: 4px; align-items: center; }
+
+.nhr-scope .field-label .req { color: var(--danger); }
+
+.nhr-scope .field-help { font-size: 11.5px; color: var(--text-3); }
+
+.nhr-scope .field-error { font-size: 11.5px; color: var(--danger-ink); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+
+.nhr-scope .input,
+.nhr-scope .select,
+.nhr-scope .textarea {
+  width: 100%; padding: 9px 12px; font-size: 13px; color: var(--text-1);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm); outline: none;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .input::placeholder,
+.nhr-scope .textarea::placeholder { color: var(--text-3); }
+
+.nhr-scope .input:hover,
+.nhr-scope .select:hover,
+.nhr-scope .textarea:hover { border-color: #c3ccdd; }
+
+.nhr-scope .input:focus,
+.nhr-scope .select:focus,
+.nhr-scope .textarea:focus { border-color: var(--border-focus); box-shadow: var(--shadow-focus); }
+
+.nhr-scope .input.invalid,
+.nhr-scope .select.invalid { border-color: var(--danger); }
+
+.nhr-scope .input.invalid:focus { box-shadow: 0 0 0 3px rgba(220, 71, 71, 0.15); }
+
+.nhr-scope .textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
+
+.nhr-scope .select { appearance: none; cursor: pointer; padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6478' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+
+/* Floating label variant */
+.nhr-scope .float-field { position: relative; }
+
+.nhr-scope .float-field .input,
+.nhr-scope .float-field .select,
+.nhr-scope .float-field .textarea { padding: 20px 12px 7px; }
+
+.nhr-scope .float-field > label {
+  position: absolute; left: 13px; top: 14px; font-size: 13px; color: var(--text-3);
+  pointer-events: none; transition: all var(--dur-fast) var(--ease); font-weight: 500;
+}
+
+.nhr-scope .float-field:focus-within > label,
+.nhr-scope .float-field.has-value > label {
+  top: 6px; font-size: 10px; font-weight: 700; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.nhr-scope .float-field:focus-within > label { color: var(--primary-600); }
+
+
+/* Search box */
+.nhr-scope .searchbox { position: relative; display: flex; align-items: center; }
+
+.nhr-scope .searchbox .input { padding-left: 34px; }
+
+.nhr-scope .searchbox > svg { position: absolute; left: 11px; color: var(--text-3); pointer-events: none; }
+
+.nhr-scope .searchbox .kbd-hint { position: absolute; right: 9px; }
+
+
+.nhr-scope .kbd {
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-3);
+  border: 1px solid var(--border-strong); border-bottom-width: 2px;
+  border-radius: 5px; padding: 1px 5px; background: var(--surface-2);
+}
+
+
+/* Checkbox / switch */
+.nhr-scope .checkbox {
+  width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;
+}
+
+.nhr-scope .switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
+
+.nhr-scope .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+.nhr-scope .switch .track {
+  position: absolute; inset: 0; border-radius: var(--r-full);
+  background: #d3dae6; transition: background var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .switch .thumb {
+  position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+  border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.nhr-scope .switch input:checked ~ .track { background: var(--primary); }
+
+.nhr-scope .switch input:checked ~ .thumb { transform: translateX(16px); }
+
+
+/* Form sections */
+.nhr-scope .form-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+
+.nhr-scope .form-section-head {
+  display: flex; align-items: center; gap: 12px; padding: 15px 20px;
+  border-bottom: 1px solid var(--border); background: var(--surface-2);
+}
+
+.nhr-scope .form-section-body { padding: 20px; }
+
+.nhr-scope .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.nhr-scope .form-grid .span-2 { grid-column: span 2; }
+
+.nhr-scope .form-grid .span-3 { grid-column: span 3; }
+
+@media (max-width: 1000px) {
+ .nhr-scope .form-grid { grid-template-columns: repeat(2, 1fr); }
+ .nhr-scope .form-grid .span-3 { grid-column: span 2; }
+ }
+
+@media (max-width: 640px) {
+ .nhr-scope .form-grid { grid-template-columns: 1fr; }
+ .nhr-scope .form-grid .span-2,
+.nhr-scope .form-grid .span-3 { grid-column: span 1; }
+ }
+
+
+/* ---- Employee wizard: dense, low-scroll form ---- */
+.nhr-scope .nhr-wiz-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px 13px; align-items: start;
+}
+.nhr-scope .nhr-wiz-grid .field-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nhr-scope .nhr-wiz-full { grid-column: 1 / -1; }
+.nhr-scope .nhr-wiz-sec {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-2);
+}
+.nhr-scope .nhr-wiz-sec::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--primary); flex-shrink: 0; }
+.nhr-scope .nhr-wiz-sec:first-child { margin-top: 0; }
+
+/* collapsible "advanced" toggle inside a step */
+.nhr-scope .nhr-wiz-adv {
+  display: flex; align-items: center; gap: 7px; width: 100%; margin-top: 4px;
+  background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: 10px;
+  padding: 10px 13px; cursor: pointer; font-size: 11px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--text-2);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.nhr-scope .nhr-wiz-adv:hover { background: var(--primary-soft, #eef2ff); border-color: var(--border-focus); color: var(--primary-700); }
+.nhr-scope .nhr-wiz-adv > svg { color: var(--primary); flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .nhr-scope .nhr-wiz-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* ---- Resume upload / AI auto-fill dropzone ---- */
+.nhr-scope .nhr-resume-drop {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px 14px; border-radius: 12px; cursor: pointer;
+  border: 1.5px dashed var(--border-strong); color: var(--text-1);
+  background: linear-gradient(120deg, var(--tint-lavender, #eef0ff), var(--tint-blue, #eaf2ff));
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.nhr-scope .nhr-resume-drop:hover:not(:disabled) { border-color: var(--primary); box-shadow: var(--shadow-focus); }
+.nhr-scope .nhr-resume-drop:active:not(:disabled) { transform: translateY(1px); }
+.nhr-scope .nhr-resume-drop:disabled { cursor: progress; opacity: 0.9; }
+.nhr-scope .nhr-resume-ic {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface); color: var(--primary-600, #4f46e5); box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,.08));
+}
+.nhr-scope .nhr-spin { animation: nhr-spin 0.8s linear infinite; }
+@keyframes nhr-spin { to { transform: rotate(360deg); } }
+
+
+/* ================= Stepper ================= */
+.nhr-scope .stepper { display: flex; align-items: flex-start; gap: 0; }
+
+.nhr-scope .step { display: flex; align-items: center; flex: 1; min-width: 0; }
+
+.nhr-scope .step-dot {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12.5px; font-weight: 700; border: 2px solid var(--border-strong);
+  background: var(--surface); color: var(--text-3);
+  transition: all var(--dur) var(--ease);
+}
+
+.nhr-scope .step.done .step-dot { background: var(--success); border-color: var(--success); color: #fff; }
+
+.nhr-scope .step.current .step-dot { border-color: var(--primary); color: var(--primary-700); box-shadow: var(--shadow-focus); }
+
+.nhr-scope .step-line { flex: 1; height: 2px; background: var(--border-strong); margin: 0 8px; border-radius: 2px; position: relative; overflow: hidden; }
+
+.nhr-scope .step.done .step-line::after { content: ''; position: absolute; inset: 0; background: var(--success); animation: nhr-fadeIn var(--dur-slow) var(--ease); }
+
+.nhr-scope .step-meta { margin-left: 10px; min-width: 0; }
+
+.nhr-scope .step-title { font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+
+.nhr-scope .step.current .step-title { color: var(--text-1); }
+
+.nhr-scope .step-sub { font-size: 10.5px; color: var(--text-3); }
+
+
+/* ================= Drawer ================= */
+/* z-index lifted from the source values (60/61/70) onto the host app's scale:
+   AdminLTE fixed header/sidebar sit at 1030-1070, design-system tokens use
+   drawer=1400 / modal=1500 / notification=1600. */
+.nhr-scope .overlay {
+  position: fixed; inset: 0; z-index: 1390;
+  /* explicit size: host app declares `.overlay { height: 0% }` which would
+     collapse an inset-only backdrop to nothing */
+  width: 100%; height: 100%;
+  overflow-y: visible; transition: none;
+  background: rgba(23, 32, 58, 0.35);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  animation: nhr-fadeIn var(--dur) var(--ease);
+}
+
+.nhr-scope .drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1400;
+  width: min(616px, 94vw); background: var(--surface);
+  box-shadow: var(--shadow-pop); display: flex; flex-direction: column;
+  animation: nhr-slideInRight var(--dur-slow) var(--ease);
+  border-left: 1px solid var(--border);
+}
+
+.nhr-scope .drawer.drawer-lg { width: min(760px, 96vw); }
+
+.nhr-scope .drawer.drawer-xl { width: min(960px, 97vw); }
+
+.nhr-scope .drawer-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+
+.nhr-scope .drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+.nhr-scope .drawer-foot {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 14px 24px; border-top: 1px solid var(--border); flex-shrink: 0;
+  background: var(--surface-2);
+}
+
+/* ============ Ported from source layout.css (chrome file was discarded,
+   but these two generic classes are used by pages/components) ============ */
+.nhr-scope .icon-btn {
+  width: 36px; height: 36px; border-radius: var(--r-sm); border: none;
+  background: transparent; color: var(--text-2); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all var(--dur-fast) var(--ease); position: relative; flex-shrink: 0;
+}
+
+.nhr-scope .icon-btn:hover { background: var(--surface-3); color: var(--text-1); }
+
+.nhr-scope .breadcrumb {
+  display: flex; align-items: center; gap: 6px; font-size: 12px;
+  color: var(--text-3); margin-bottom: 14px; flex-wrap: wrap;
+  /* host bootstrap defines .breadcrumb with its own padding/background */
+  padding: 0; background: transparent; border-radius: 0;
+}
+
+.nhr-scope .breadcrumb a { color: var(--text-3); font-weight: 500; }
+
+.nhr-scope .breadcrumb a:hover { color: var(--primary-600); }
+
+.nhr-scope .breadcrumb .crumb-current { color: var(--text-1); font-weight: 600; }
+
+/* Floating close for headless drawers (no title bar) — sits tucked inside the
+   top-right of the drawer's own hero card, circular so it reads on any tint. */
+.nhr-scope .drawer-close-float {
+  position: absolute; top: 24px; right: 28px; z-index: 5;
+  width: 32px; height: 32px;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(102, 114, 241, 0.18);
+  color: var(--text-1);
+}
+
+.nhr-scope .drawer-close-float:hover {
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Compact employee-profile drawer */
+.nhr-scope .drawer-body.emp-profile-body { padding: 14px 18px 18px; }
+
+.nhr-scope .emp-profile-body .tabs {
+  position: sticky; top: -14px; z-index: 4;
+  background: var(--surface);
+}
+
+.nhr-scope .emp-profile-body .detail-row { padding: 7px 0; }
+
+
+/* ================= Modal ================= */
+.nhr-scope .modal-wrap {
+  position: fixed; inset: 0; z-index: 1500; display: flex;
+  align-items: center; justify-content: center; padding: 24px;
+}
+
+.nhr-scope .modal {
+  /* must stay above .overlay (1390) inside the modal-wrap stacking context */
+  position: relative; z-index: 1400; width: min(560px, 100%);
+  background: var(--surface); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-pop); display: flex; flex-direction: column;
+  animation: nhr-scaleIn var(--dur) var(--ease-spring);
+  max-height: min(86vh, 900px); overflow: hidden;
+}
+
+.nhr-scope .modal-lg { width: min(760px, 100%); }
+
+.nhr-scope .modal-xl { width: min(1020px, 100%); }
+
+/* Near full-viewport modal for builder screens (e.g. formula setting) —
+   wide enough that the two-panel layout fits without body scroll. */
+.nhr-scope .modal-full { width: min(96vw, 1600px); max-height: 94vh; }
+
+.nhr-scope .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 24px 0; }
+
+.nhr-scope .modal-body { padding: 18px 24px; overflow-y: auto; }
+
+.nhr-scope .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); background: var(--surface-2); }
+
+
+/* Body-level portals (menus, modals, drawers) re-add .nhr-scope so the design
+   tokens apply — but must NOT inherit the app-shell box from `.nhr-scope`
+   (`height: 100%` + page background), which turns the portal wrapper into a
+   full-viewport grey slab and pushes its contents away from the anchor.
+   Two classes beat the one-class .nhr-scope rules regardless of file order. */
+.nhr-scope.nhr-portal-layer {
+  height: auto; min-height: 0; width: auto; background: transparent;
+}
+
+/* ================= Dropdown / menu ================= */
+.nhr-scope .menu-pop {
+  position: absolute; z-index: 50; min-width: 190px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-lg);
+  padding: 6px; animation: nhr-fadeDown var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: none; background: none; border-radius: var(--r-xs);
+  font-size: 13px; font-weight: 500; color: var(--text-1); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease); text-align: left;
+}
+
+.nhr-scope .menu-item:hover { background: var(--surface-3); }
+
+.nhr-scope .menu-item.danger { color: var(--danger-ink); }
+
+.nhr-scope .menu-item.danger:hover { background: var(--danger-soft); }
+
+.nhr-scope .menu-sep { height: 1px; background: var(--border); margin: 5px 4px; }
+
+.nhr-scope .menu-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); padding: 6px 10px 3px; }
+
+
+/* ================= Timeline ================= */
+.nhr-scope .timeline { position: relative; padding-left: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+.nhr-scope .timeline::before {
+  content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+  width: 2px; background: var(--border); border-radius: 2px;
+}
+
+.nhr-scope .timeline-item { position: relative; animation: nhr-fadeUp var(--dur-slow) var(--ease) both; }
+
+.nhr-scope .timeline-dot {
+  position: absolute; left: -24px; top: 3px; width: 16px; height: 16px;
+  border-radius: 50%; border: 3px solid var(--surface);
+  background: var(--primary); box-shadow: 0 0 0 1.5px var(--border-strong);
+  z-index: 1;
+}
+
+.nhr-scope .timeline-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+
+.nhr-scope .timeline-time { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+.nhr-scope .timeline-desc { font-size: 12.5px; color: var(--text-2); margin-top: 4px; line-height: 1.5; }
+
+
+/* ================= Empty state ================= */
+.nhr-scope .empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 48px 24px; gap: 6px;
+}
+
+.nhr-scope .empty-icon {
+  width: 64px; height: 64px; border-radius: 20px; margin-bottom: 10px;
+  background: var(--surface-3); color: var(--text-3);
+  display: flex; align-items: center; justify-content: center;
+  animation: nhr-popIn var(--dur-slow) var(--ease-spring);
+}
+
+.nhr-scope .empty-title { font-size: 15px; font-weight: 700; color: var(--text-1); }
+
+.nhr-scope .empty-desc { font-size: 13px; color: var(--text-2); max-width: 360px; }
+
+
+/* ================= Skeleton ================= */
+.nhr-scope .skeleton {
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--surface-3) 25%, #e9edf5 50%, var(--surface-3) 75%);
+  background-size: 200% 100%;
+  animation: nhr-shimmer 1.4s linear infinite;
+}
+
+
+/* ================= Toast ================= */
+.nhr-scope .toast-stack {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1600;
+  display: flex; flex-direction: column; gap: 10px; max-width: 380px;
+}
+
+.nhr-scope .toast {
+  display: flex; align-items: flex-start; gap: 11px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-lg);
+  padding: 13px 15px; animation: nhr-slideInRight var(--dur-slow) var(--ease-spring);
+  min-width: 300px;
+}
+
+.nhr-scope .toast-title { font-size: 13px; font-weight: 700; color: var(--text-1); }
+
+.nhr-scope .toast-desc { font-size: 12.5px; color: var(--text-2); margin-top: 1px; }
+
+
+/* ================= Progress ================= */
+.nhr-scope .progress-track {
+  height: 7px; border-radius: var(--r-full); background: var(--surface-3);
+  overflow: hidden; position: relative;
+}
+
+.nhr-scope .progress-fill {
+  height: 100%; border-radius: var(--r-full); background: var(--primary);
+  transition: width 700ms var(--ease); transform-origin: left;
+}
+
+
+/* ================= Tooltip (chart & general) ================= */
+.nhr-scope .viz-tooltip {
+  position: fixed; z-index: 1550; pointer-events: none;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); box-shadow: var(--shadow-lg);
+  padding: 9px 12px; font-size: 12px; min-width: 120px;
+  animation: nhr-fadeIn var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .viz-tooltip .tt-title { font-weight: 700; color: var(--text-1); margin-bottom: 5px; font-size: 11.5px; }
+
+.nhr-scope .viz-tooltip .tt-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: var(--text-2); padding: 1.5px 0; }
+
+.nhr-scope .viz-tooltip .tt-swatch { width: 8px; height: 8px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+
+.nhr-scope .viz-tooltip .tt-val { font-weight: 700; color: var(--text-1); font-variant-numeric: tabular-nums; }
+
+
+/* ================= Page scaffolding ================= */
+.nhr-scope .page { display: flex; flex-direction: column; gap: 20px; animation: nhr-fadeUp var(--dur-slow) var(--ease); }
+
+.nhr-scope .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+.nhr-scope .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.025em; color: var(--text-1); display: flex; align-items: center; gap: 11px; }
+
+.nhr-scope .page-desc { font-size: 13px; color: var(--text-2); margin-top: 3px; max-width: 640px; }
+
+.nhr-scope .page-icon {
+  width: 42px; height: 42px; border-radius: var(--r-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.nhr-scope .page-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+
+.nhr-scope .section-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-1); }
+
+
+/* Filter bar */
+.nhr-scope .filter-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 12px 14px; box-shadow: var(--shadow-xs);
+}
+
+
+/* Detail rows (info panel) */
+.nhr-scope .detail-list { display: flex; flex-direction: column; }
+
+.nhr-scope .detail-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 6px 16px; padding: 9px 0; border-bottom: 1px dashed var(--border); min-width: 0; }
+
+.nhr-scope .detail-row:last-child { border-bottom: none; }
+
+.nhr-scope .detail-key { font-size: 12.5px; color: var(--text-3); font-weight: 500; min-width: 0; overflow-wrap: break-word; }
+
+.nhr-scope .detail-val { font-size: 13px; color: var(--text-1); font-weight: 600; text-align: right; margin-left: auto; }
+
+/* Stat-tile variant: wrap DetailRows in .detail-grid to render them as a
+   uniform grid of label-over-value tiles (drawer summary strips). */
+.nhr-scope .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+
+.nhr-scope .detail-grid .detail-row {
+  flex-direction: column; align-items: stretch; gap: 5px; padding: 10px 12px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+}
+
+.nhr-scope .detail-grid .detail-key { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.nhr-scope .detail-grid .detail-val { margin-left: 0; text-align: left; font-size: 14.5px; }
+
+
+/* Accordion — backgrounds carry !important so host-app global button/card
+   styles can never repaint the header (they leaked a solid green before) */
+.nhr-scope .accordion-item { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+
+.nhr-scope .accordion-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; padding: 14px 18px; background: var(--surface) !important; border: none; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; color: var(--text-1);
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.nhr-scope .accordion-head:hover { background: var(--surface-2) !important; }
+
+.nhr-scope .accordion-body { padding: 4px 18px 16px; animation: nhr-fadeDown var(--dur) var(--ease); }
+
+/* Pastel-tinted accordion (tone prop) */
+.nhr-scope .accordion-tinted { border-color: color-mix(in srgb, var(--acc-ink) 14%, var(--border)); }
+
+.nhr-scope .accordion-tinted .accordion-head {
+  background: linear-gradient(95deg, var(--acc-tint), color-mix(in srgb, var(--acc-tint) 28%, var(--surface))) !important;
+}
+
+.nhr-scope .accordion-tinted .accordion-head:hover {
+  background: linear-gradient(95deg, color-mix(in srgb, var(--acc-tint) 88%, var(--acc-ink)), color-mix(in srgb, var(--acc-tint) 42%, var(--surface))) !important;
+}
+
+.nhr-scope .accordion-ico {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--surface) 72%, transparent); color: var(--acc-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc-ink) 15%, transparent);
+}
+
+
+/* Notes / comments */
+.nhr-scope .comment {
+  display: flex; gap: 11px; padding: 12px 0;
+}
+
+.nhr-scope .comment-bubble {
+  flex: 1; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 4px 14px 14px 14px; padding: 10px 14px;
+}
+
+
+/* ======================================================================
+   Smart-UI refresh — Inputs, Select, SearchSelect/MultiSelect & Cards.
+   Appended last so it upgrades the base rules above (equal specificity,
+   later wins). Token-based + theme-aware, no new colors invented.
+   ====================================================================== */
+
+/* ---- Inputs / Select / Textarea ---- */
+.nhr-scope .input,
+.nhr-scope .select,
+.nhr-scope .textarea {
+  font-size: 12.5px;
+  border-radius: var(--r-sm);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  caret-color: var(--primary-600);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
+}
+
+/* Compact 27px single-line controls */
+.nhr-scope .input,
+.nhr-scope .select {
+  height: 27px;
+  padding: 0 10px;
+  line-height: 25px;
+}
+.nhr-scope .textarea {
+  padding: 6px 10px;
+  min-height: 60px;
+  line-height: 1.5;
+}
+.nhr-scope .select {
+  padding-right: 30px;
+  background-position: right 9px center;
+}
+
+.nhr-scope .input:hover:not(:focus):not(:disabled),
+.nhr-scope .select:hover:not(:focus):not(:disabled),
+.nhr-scope .textarea:hover:not(:focus):not(:disabled) {
+  border-color: var(--border-focus);
+  background: var(--surface);
+}
+
+.nhr-scope .input:focus,
+.nhr-scope .select:focus,
+.nhr-scope .textarea:focus {
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-ring), var(--shadow-xs);
+}
+
+.nhr-scope .input:disabled,
+.nhr-scope .select:disabled,
+.nhr-scope .textarea:disabled {
+  background: var(--surface-3);
+  color: var(--text-3);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.nhr-scope .input.invalid,
+.nhr-scope .select.invalid,
+.nhr-scope .textarea.invalid {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger-soft) 40%, var(--surface));
+}
+.nhr-scope .input.invalid:focus,
+.nhr-scope .select.invalid:focus,
+.nhr-scope .textarea.invalid:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent), var(--shadow-xs);
+}
+
+/* Select chevron: slightly stronger, animates tint on focus */
+.nhr-scope .select { background-position: right 12px center; padding-right: 36px; }
+
+/* ---- SearchSelect / MultiSelect trigger (button.input) ---- */
+.nhr-scope .nhr-combo-trigger {
+  min-height: 27px;
+  font-weight: 500;
+}
+.nhr-scope .nhr-combo-trigger.is-open {
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-ring), var(--shadow-xs);
+}
+.nhr-scope .nhr-caret {
+  color: var(--text-3);
+  transition: transform var(--dur) var(--ease), color var(--dur-fast) var(--ease);
+  flex-shrink: 0;
+}
+.nhr-scope .nhr-combo-trigger.is-open .nhr-caret { transform: rotate(180deg); color: var(--primary-600); }
+
+/* ---- Dropdown menu (SearchSelect, MultiSelect, Dropdown) ---- */
+@keyframes nhr-menuOpen {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.nhr-scope .menu-pop {
+  padding: 6px;
+  border-radius: var(--r-md);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-pop);
+  transform-origin: top center;
+  animation: nhr-menuOpen 170ms var(--ease);
+}
+.nhr-scope .menu-item {
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.nhr-scope .menu-item:hover {
+  background: var(--primary-softer);
+  color: var(--primary-700);
+}
+.nhr-scope .menu-item:active { transform: scale(0.99); }
+
+/* Dropdown search field spacing inside a combo popover */
+.nhr-scope .menu-pop .searchbox .input {
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+}
+.nhr-scope .menu-pop .searchbox .input:focus { background: var(--surface); }
+
+/* ---- Cards ---- */
+.nhr-scope .card {
+  border-radius: var(--r-lg);
+  border-color: var(--border);
+  transition:
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.nhr-scope .card-hover { cursor: pointer; }
+.nhr-scope .card-hover:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border-strong));
+}
+.nhr-scope .card-hover:active { transform: translateY(-1px); }
+
+/* subtle top hairline accent on padded cards for a crafted look */
+.nhr-scope .card-pad { position: relative; }
+
+/* metric cards: lift + accent ring on hover */
+.nhr-scope .metric-card { transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.nhr-scope .metric-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border-strong));
+}
+
+/* honor reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .nhr-scope .card-hover:hover,
+  .nhr-scope .metric-card:hover { transform: none; }
+  .nhr-scope .nhr-caret { transition: none; }
+  .nhr-scope .menu-pop { animation: none; }
+}
+
+/* ---- Custom calendar (DateInput popover) ---- */
+.nhr-scope .nhr-cal { padding: 10px; }
+.nhr-scope .nhr-cal-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+.nhr-scope .nhr-cal-title { font-size: 13px; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; }
+
+/* Clickable month-year title: drills days -> months -> years */
+.nhr-scope .nhr-cal-title-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer;
+  border-radius: 8px; padding: 4px 10px;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.nhr-scope .nhr-cal-title-btn:hover { background: var(--primary-softer); color: var(--primary-700); }
+
+/* Month / year picker grids */
+.nhr-scope .nhr-cal-block-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px 2px; }
+.nhr-scope .nhr-cal-block {
+  border: none; background: var(--surface-2); color: var(--text-1);
+  font-size: 12.5px; font-weight: 600; border-radius: 9px; padding: 10px 0;
+  cursor: pointer; transition: background 0.14s ease, color 0.14s ease, transform 0.1s ease;
+}
+.nhr-scope .nhr-cal-block:hover:not(.sel) { background: var(--primary-softer); color: var(--primary-700); }
+.nhr-scope .nhr-cal-block:active { transform: scale(0.94); }
+.nhr-scope .nhr-cal-block.now:not(.sel) { box-shadow: inset 0 0 0 1.5px var(--border-focus); font-weight: 700; }
+.nhr-scope .nhr-cal-block.sel { background: var(--primary); color: #fff; font-weight: 700; box-shadow: 0 2px 6px var(--primary-ring); }
+.nhr-scope .nhr-cal-nav {
+  width: 28px; height: 28px; display: grid; place-items: center;
+  border: none; background: none; border-radius: var(--r-sm); color: var(--text-2); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.nhr-scope .nhr-cal-nav:hover { background: var(--primary-softer); color: var(--primary-700); }
+.nhr-scope .nhr-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.nhr-scope .nhr-cal-dow { margin-bottom: 4px; }
+.nhr-scope .nhr-cal-dow-cell {
+  text-align: center; font-size: 10.5px; font-weight: 700; color: var(--text-3);
+  padding: 3px 0; text-transform: uppercase; letter-spacing: 0.03em;
+}
+.nhr-scope .nhr-cal-day {
+  height: 32px; border: none; background: none; border-radius: var(--r-sm);
+  font-size: 12.5px; color: var(--text-1); cursor: pointer; font-family: inherit;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.nhr-scope .nhr-cal-day:hover:not(:disabled):not(.sel) { background: var(--primary-softer); color: var(--primary-700); }
+.nhr-scope .nhr-cal-day:active:not(:disabled) { transform: scale(0.92); }
+.nhr-scope .nhr-cal-day.today:not(.sel) { box-shadow: inset 0 0 0 1.5px var(--border-focus); font-weight: 700; }
+.nhr-scope .nhr-cal-day.sel { background: var(--primary); color: #fff; font-weight: 700; box-shadow: 0 2px 6px var(--primary-ring); }
+.nhr-scope .nhr-cal-day:disabled { color: var(--text-3); opacity: 0.4; cursor: not-allowed; }
+.nhr-scope .nhr-cal-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+}
+.nhr-scope .nhr-cal-link {
+  border: none; background: none; color: var(--primary-600); font-size: 12px; font-weight: 600;
+  cursor: pointer; padding: 3px 8px; border-radius: var(--r-xs); font-family: inherit;
+  transition: background var(--dur-fast) var(--ease);
+}
+.nhr-scope .nhr-cal-link:hover { background: var(--primary-softer); }
+
+
+/* ============================================================
+   Screen Field Builder — structure / live-preview workspace
+   ============================================================ */
+
+/* The two panes stay parallel for as long as each can hold a usable form —
+   auto-fit works off the real width instead of a guessed viewport breakpoint. */
+.nhr-scope .fb-workspace {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(410px, 1fr));
+  gap: 16px; align-items: start;
+}
+@media (max-width: 880px) { .nhr-scope .fb-workspace { grid-template-columns: minmax(0, 1fr); } }
+
+.nhr-scope .fb-sticky { position: sticky; top: 12px; }
+@media (max-width: 1100px) { .nhr-scope .fb-sticky { position: static; } }
+
+.nhr-scope .fb-panel-head {
+  display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+  padding-bottom: 12px; margin-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+/* its own track, so a long subtitle wraps instead of shoving the button away */
+.nhr-scope .fb-panel-head .fb-ht { flex: 1 1 220px; min-width: 0; }
+.nhr-scope .fb-panel-head > .btn { flex: none; margin-left: auto; }
+.nhr-scope .fb-panel-title {
+  display: flex; align-items: center; gap: 8px; line-height: 1.35;
+  font-size: 14px; font-weight: 700; color: var(--text-1);
+}
+.nhr-scope .fb-panel-title > svg { flex: none; }
+.nhr-scope .fb-panel-sub { display: block; font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+/* pane switch — phones show one pane at a time instead of a long scroll */
+.nhr-scope .fb-paneswitch { display: none; }
+@media (max-width: 880px) {
+  .nhr-scope .fb-paneswitch { display: flex; justify-content: center; margin-bottom: 12px; }
+  .nhr-scope .fb-paneswitch .segmented { width: 100%; max-width: 420px; }
+  .nhr-scope .fb-paneswitch .segmented button { flex: 1; }
+  .nhr-scope .fb-workspace.pane-structure > .fb-pane-preview,
+  .nhr-scope .fb-workspace.pane-preview > .fb-pane-structure { display: none; }
+}
+
+/* --- field rows: draggable, no dead space between them --- */
+.nhr-scope .fb-list { display: flex; flex-direction: column; gap: 8px; }
+
+.nhr-scope .fb-row {
+  position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: 10px;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--r-md, 12px);
+  background: var(--surface);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+/* the whole box is the drag target, so it carries the grab cursor —
+   the controls inside it stay ordinary buttons */
+.nhr-scope .fb-row { cursor: grab; }
+.nhr-scope .fb-row:active { cursor: grabbing; }
+.nhr-scope .fb-row.is-dragging { cursor: grabbing; }
+.nhr-scope .fb-row .btn { cursor: pointer; }
+.nhr-scope .fb-row .btn:disabled { cursor: not-allowed; }
+@media (hover: none) { .nhr-scope .fb-row { cursor: default; } }
+
+.nhr-scope .fb-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+.nhr-scope .fb-row.is-system { background: var(--surface-2); }
+.nhr-scope .fb-row.is-custom { box-shadow: inset 3px 0 0 var(--primary); }
+.nhr-scope .fb-row.is-custom:hover { box-shadow: inset 3px 0 0 var(--primary), var(--shadow-xs); }
+.nhr-scope .fb-row.is-active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-ring); }
+.nhr-scope .fb-row.is-dragging { opacity: 0.4; }
+
+/* where the dragged row would land */
+.nhr-scope .fb-row[data-over]::after {
+  content: ''; position: absolute; left: 4px; right: 4px; height: 2px;
+  background: var(--primary); border-radius: 2px; box-shadow: 0 0 0 3px var(--primary-ring);
+}
+.nhr-scope .fb-row[data-over='before']::after { top: -7px; }
+.nhr-scope .fb-row[data-over='after']::after { bottom: -7px; }
+
+.nhr-scope .fb-grip {
+  display: flex; align-items: center; gap: 6px; cursor: grab;
+  color: var(--text-3); border: none; background: none; padding: 0; font: inherit;
+  border-radius: 8px; transition: color var(--dur-fast) var(--ease);
+}
+.nhr-scope .fb-grip:hover { color: var(--primary-600); }
+.nhr-scope .fb-grip:active { cursor: grabbing; }
+.nhr-scope .fb-grip:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.nhr-scope .fb-grip > svg { opacity: 0.55; }
+.nhr-scope .fb-row:hover .fb-grip > svg { opacity: 1; }
+
+.nhr-scope .fb-row-num {
+  width: 22px; height: 22px; flex: none; border-radius: 7px; display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; color: var(--text-3); background: var(--surface-3);
+}
+.nhr-scope .fb-row.is-custom .fb-row-num { background: var(--primary); color: #fff; }
+
+.nhr-scope .fb-row-main { min-width: 0; }
+.nhr-scope .fb-row-label {
+  font-size: 13px; font-weight: 700; color: var(--text-1); line-height: 1.35;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nhr-scope .fb-row-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 3px; }
+.nhr-scope .fb-row-meta code { font-size: 10.5px; }
+
+.nhr-scope .fb-row-actions {
+  display: flex; align-items: center; gap: 2px;
+  opacity: 0.35; transition: opacity var(--dur-fast) var(--ease);
+}
+.nhr-scope .fb-row:hover .fb-row-actions,
+.nhr-scope .fb-row:focus-within .fb-row-actions { opacity: 1; }
+
+/* HTML5 drag needs a pointer — touch keeps explicit move buttons */
+.nhr-scope .fb-touchmove { display: none; }
+@media (hover: none) {
+  .nhr-scope .fb-row-actions { opacity: 1; }
+  .nhr-scope .fb-touchmove { display: inline-flex; }
+  .nhr-scope .fb-grip { cursor: default; }
+}
+
+
+/* --- live preview --- */
+.nhr-scope .fb-pv {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+  padding: 18px; border: 1px solid var(--border); border-radius: var(--r-lg, 16px);
+  background: var(--surface-2);
+}
+@media (max-width: 640px) { .nhr-scope .fb-pv { grid-template-columns: minmax(0, 1fr); } }
+.nhr-scope .fb-pv-item { position: relative; border-radius: 10px; }
+.nhr-scope .fb-pv-item.is-custom { box-shadow: 0 0 0 1px var(--primary-soft); padding: 8px; margin: -8px; background: var(--surface); }
+.nhr-scope .fb-pv-item.is-draft {
+  box-shadow: 0 0 0 2px var(--primary); background: var(--surface);
+  animation: fbPulse 1.4s var(--ease) infinite;
+}
+@keyframes fbPulse { 0%, 100% { box-shadow: 0 0 0 2px var(--primary); } 50% { box-shadow: 0 0 0 2px var(--primary), 0 0 0 7px var(--primary-ring); } }
+.nhr-scope .fb-pv-tag {
+  position: absolute; top: -8px; right: 6px; z-index: 1;
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px; background: var(--primary); color: #fff;
+}
+.nhr-scope .fb-pv-tag.is-system { background: var(--surface-3); color: var(--text-3); }
+
+.nhr-scope .fb-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-3); }
+.nhr-scope .fb-legend i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 5px; vertical-align: -1px; }
+
+/* --- preview: detail / print surface --- */
+.nhr-scope .fb-pv-rows { padding: 6px 18px 14px; border: 1px solid var(--border); border-radius: var(--r-lg, 16px); background: var(--surface-2); }
+.nhr-scope .fb-pv-row { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--border); }
+.nhr-scope .fb-pv-row:last-child { border-bottom: none; }
+.nhr-scope .fb-pv-row.is-custom { background: var(--surface); border-radius: 8px; padding: 9px 10px; box-shadow: 0 0 0 1px var(--primary-soft); }
+.nhr-scope .fb-pv-row .k { flex: none; width: 42%; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.nhr-scope .fb-pv-row .v { font-size: 13px; color: var(--text-1); }
+
+/* --- surface map --- */
+.nhr-scope .fb-map-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+}
+
+/* --- editor: placement strip --- */
+.nhr-scope .fb-strip {
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r-md, 12px);
+  background: var(--surface-2);
+}
+.nhr-scope .fb-chip {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.nhr-scope .fb-chip.is-custom { color: var(--primary-700); background: var(--primary-softer); border-color: var(--primary-soft); }
+.nhr-scope .fb-chip.is-draft {
+  color: #fff; background: var(--primary); border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-ring);
+}
+
+/* --- small screens --- */
+@media (max-width: 880px) {
+  .nhr-scope .fb-workspace > .card-pad { padding: 14px; }
+  .nhr-scope .fb-panel-head > .btn { width: 100%; justify-content: center; margin-left: 0; }
+  .nhr-scope .fb-pv { padding: 14px; gap: 14px; }
+}
+
+@media (max-width: 620px) {
+  /* handle + label on the first line, meta under it, actions on their own row */
+  .nhr-scope .fb-row { grid-template-columns: auto minmax(0, 1fr); padding: 9px 10px; }
+  .nhr-scope .fb-row-actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .nhr-scope .fb-row-actions .btn { flex: 1; justify-content: center; }
+
+  .nhr-scope .fb-pv-row { flex-wrap: wrap; gap: 2px 12px; }
+  .nhr-scope .fb-pv-row .k { width: 100%; }
+
+  .nhr-scope .fb-map-row { gap: 8px; }
+  .nhr-scope .fb-map-row > .t-xs { margin-left: 0 !important; flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nhr-scope .fb-pv-item.is-draft { animation: none; }
+}
+
+/* ======================================================================
+   Table footer — rows-per-page + pager.
+   The compact .select rule above is height:27px / line-height:25px, which
+   leaves a 15px content box once padding is added: the option label was
+   being clipped. Size the footer select explicitly instead of patching it
+   with inline padding, and keep it on the same 30px rhythm as the pager.
+   ====================================================================== */
+.nhr-scope .table-footer-nav {
+  display: flex; align-items: center; gap: 10px;
+  margin-left: auto; flex-wrap: wrap;
+}
+
+.nhr-scope .select.dt-pagesize {
+  width: auto; flex: none;
+  height: 30px; line-height: 28px;
+  padding: 0 30px 0 11px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-2);
+  background-color: var(--surface-2);
+  background-position: right 10px center;
+  border-radius: var(--r-xs);
+}
+
+.nhr-scope .select.dt-pagesize:hover:not(:focus) { color: var(--text-1); }
+
+.nhr-scope .table-footer > .t-sm { min-width: 0; }
+
+@media (max-width: 620px) {
+  .nhr-scope .table-footer { justify-content: center; text-align: center; padding: 10px 12px; }
+  .nhr-scope .table-footer-nav { margin-left: 0; width: 100%; justify-content: center; }
+  .nhr-scope .pager { flex-wrap: wrap; justify-content: center; }
+}
+
+/* ======================================================================
+   Page header — compact bar.
+   The original header was sized for a marketing-style hero: 42px tile,
+   22px title, 14px breadcrumb gap, 20px page gap. On a dense admin screen
+   that band ate ~120px before any content. Tightened to a single 36px
+   row with a hairline rule, so the header reads as a bar, not a block.
+   ====================================================================== */
+.nhr-scope .page { gap: 14px; }
+
+.nhr-scope .breadcrumb { font-size: 11.5px; gap: 5px; margin-bottom: 7px; }
+
+.nhr-scope .page-header {
+  align-items: center;
+  gap: 8px 14px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nhr-scope .page-head-main {
+  display: flex; align-items: center; gap: 11px;
+  min-width: 0; flex: 1 1 300px;
+}
+
+.nhr-scope .page-head-text { min-width: 0; }
+
+.nhr-scope .page-icon {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.nhr-scope .page-icon svg { width: 18px; height: 18px; }
+.nhr-scope .page-header:hover .page-icon { transform: translateY(-1px); }
+
+.nhr-scope .page-title {
+  font-size: 18px; font-weight: 750; line-height: 1.2; gap: 8px;
+}
+
+.nhr-scope .page-desc {
+  font-size: 12px; line-height: 1.45; margin-top: 2px; max-width: 82ch;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.nhr-scope .page-actions { gap: 8px; }
+
+@media (max-width: 620px) {
+  .nhr-scope .page-header { align-items: flex-start; padding-bottom: 9px; }
+  .nhr-scope .page-actions { width: 100%; }
+  .nhr-scope .page-actions > .btn { flex: 1; justify-content: center; }
+  .nhr-scope .page-desc { -webkit-line-clamp: 3; font-size: 11.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nhr-scope .page-header:hover .page-icon { transform: none; }
+}
+
+/* ======================================================================
+   Calculated fields & cascading lists (Screen Field Builder).
+   ====================================================================== */
+
+/* A computed control is readable, not editable: same box, no caret, no hover
+   affordance, and a tint that says "this number was worked out for you". */
+.nhr-scope .input.nhr-computed {
+  background: var(--primary-softer);
+  border-color: var(--border);
+  color: var(--text-1);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+.nhr-scope .input.nhr-computed:hover,
+.nhr-scope .input.nhr-computed:focus {
+  background: var(--primary-softer);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.nhr-scope .fb-calc .textarea.mono {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* Field chips that insert {field_key} at the caret. */
+.nhr-scope .fb-calc-refs { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.nhr-scope .fb-chip.is-ref {
+  border-style: dashed;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.nhr-scope .fb-chip.is-ref:hover {
+  border-style: solid;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-700);
+}
+
+.nhr-scope .fb-calc-result {
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.nhr-scope .fb-calc-result.is-ok {
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  background: color-mix(in srgb, var(--success-soft) 55%, var(--surface));
+}
+.nhr-scope .fb-calc-result.is-bad {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: color-mix(in srgb, var(--danger-soft) 45%, var(--surface));
+  color: var(--danger-ink);
+}
+
+/* ---- Formula keypad -------------------------------------------------------
+   Sits beside the field chips: the chips are the vocabulary, the keypad is the
+   arithmetic. Five columns wide so digits, brackets, operators and the whole
+   comparison set fit inside one form field's width. ------------------------- */
+.nhr-scope .fb-calc-tools {
+  display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;
+}
+.nhr-scope .fb-calc-tools > .fb-calc-refs { flex: 1 1 260px; min-width: 0; align-content: flex-start; }
+
+.nhr-scope .fb-calcpad {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 34px);
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.nhr-scope .fb-key {
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 12.5px; font-weight: 600;
+  line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.nhr-scope .fb-key:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-700); }
+.nhr-scope .fb-key:active { transform: translateY(1px); }
+.nhr-scope .fb-key:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-ring); }
+
+/* operators read as the frame around the numbers, comparisons as a third group */
+.nhr-scope .fb-key.is-op { background: var(--surface-3); color: var(--text-2); }
+.nhr-scope .fb-key.is-cmp { background: var(--surface); color: var(--text-3); font-size: 12px; }
+.nhr-scope .fb-key.is-danger { background: var(--danger-soft); color: var(--danger-ink); border-color: transparent; }
+.nhr-scope .fb-key.is-danger:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+/* the four functions share one row across the pad's full width */
+.nhr-scope .fb-calcpad-fn {
+  grid-column: 1 / -1;
+  display: flex; gap: 4px;
+}
+
+.nhr-scope .fb-key.is-fn {
+  flex: 1 1 0; min-width: 0;
+  height: 26px;
+  background: var(--primary-softer);
+  color: var(--primary-700);
+  border-color: transparent;
+  font-size: 11px; letter-spacing: 0.01em;
+  padding: 0 2px;
+}
+.nhr-scope .fb-key.is-fn:hover { background: var(--primary); color: #fff; }
+
+@media (max-width: 620px) {
+  .nhr-scope .fb-calcpad { grid-template-columns: repeat(5, 1fr); width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nhr-scope .fb-key:active { transform: none; }
+}
+
+/* ===========================================================================
+   Print / Template Designer  (/hr/print-designer)
+   Three panes: templates | blocks & fields | live preview. The preview column
+   holds the real page at real size, scaled by JS to fit — so it is the printed
+   document, not a redrawn approximation of it.
+   =========================================================================== */
+
+.nhr-scope .pd-grid {
+  display: grid;
+  /* Two panes now: the source rail and the page. The structure editor moved into
+     a drawer, and every pixel it used to hold is a pixel the page keeps — an A4
+     portrait sheet is 794px, so this is what lets it render at 1:1 on a laptop
+     instead of being scaled down into a strip. */
+  grid-template-columns: minmax(0, 232px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+/* collapsed to an icon rail — the page takes the rest */
+.nhr-scope .pd-grid.is-railed { grid-template-columns: 52px minmax(0, 1fr); }
+/* a grid item's default min-width:auto lets long content widen the column past
+   its track and spill out of the card */
+.nhr-scope .pd-grid > .card { min-width: 0; }
+@media (max-width: 1100px) {
+  .nhr-scope .pd-grid,
+  .nhr-scope .pd-grid.is-railed { grid-template-columns: minmax(0, 1fr); }
+}
+/* the page follows the rail down the scroll, so it is still in view from anywhere */
+@media (min-width: 1101px) {
+  .nhr-scope .pd-pane { position: sticky; top: 12px; }
+}
+
+/* --- stat strip ---
+   The page-level counts on one line. Deliberately NOT metric cards: this screen
+   spends its height on the sheet being designed, and four tiles above the fold
+   push it out of view on a laptop. */
+.nhr-scope .pd-stats {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px;
+  padding: 6px 10px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: 12px; color: var(--text-2); line-height: 1.4;
+}
+.nhr-scope .pd-stat {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px 3px 4px; border-radius: 99px;
+  background: var(--surface-2);
+  transition: background .15s var(--ease);
+}
+.nhr-scope .pd-stat:hover { background: var(--surface-3); }
+.nhr-scope .pd-stat b { font-weight: 750; color: var(--text-1); font-size: 13px; }
+.nhr-scope .pd-stat-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 7px; flex: none;
+}
+/* the qualifier — which document, what paper — reads as an aside, not a value */
+.nhr-scope .pd-stat-sub {
+  font-style: normal; color: var(--text-3); font-size: 11px;
+  max-width: 15ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nhr-scope .pd-stat-sub::before { content: '·'; margin-right: 5px; }
+
+/* --- collapsed source rail --- */
+.nhr-scope .pd-rail {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 6px;
+}
+.nhr-scope .pd-rail-sep { width: 22px; height: 1px; background: var(--border); margin: 2px 0; }
+
+/* the editor column is now narrow enough that a hard 2-up cramps its inputs */
+.nhr-scope .pd-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+
+/* --- template list --- */
+.nhr-scope .pd-tpl-list { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.nhr-scope .pd-tpl {
+  text-align: left; width: 100%; min-width: 0; cursor: pointer;
+  /* a name is free text; without this it sets the column's min-content width */
+  white-space: normal;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); padding: 9px 11px;
+  transition: border-color .15s var(--ease), background .15s var(--ease);
+}
+.nhr-scope .pd-tpl:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.nhr-scope .pd-tpl.is-active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); background: var(--surface); }
+/* A template name is free text and routinely longer than this column. Without a
+   wrap rule an unbroken run of characters sets the card's minimum width and
+   pushes the name straight through its border. */
+.nhr-scope .pd-tpl-name {
+  font-weight: 650; font-size: 12.5px; line-height: 1.35;
+  min-width: 0; overflow-wrap: anywhere; word-break: break-word;
+}
+.nhr-scope .pd-tpl-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-width: 0; margin-top: 4px; font-size: 10.5px; }
+/* One button per row. As a wrapping flex row these ended up ragged — .btn is
+   white-space: nowrap, so a long label like "Apply to all documents" sets a
+   min-content width the 216px column cannot hold and the button pushed through
+   the card edge. A stack lets the label wrap and every action line up. */
+.nhr-scope .pd-tpl-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.nhr-scope .pd-tpl-actions .btn {
+  justify-content: flex-start; text-align: left;
+  white-space: normal; line-height: 1.25; min-width: 0;
+  padding: 8px 11px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+.nhr-scope .pd-tpl-actions .btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.nhr-scope .pd-tpl-actions .btn > svg { flex: none; }
+.nhr-scope .pd-tpl-actions .btn.text-danger { border-color: rgba(220, 71, 71, .35); }
+.nhr-scope .pd-tpl-actions .btn.text-danger:hover:not(:disabled) { background: rgba(220, 71, 71, .07); border-color: var(--danger); }
+
+/* --- block list ---
+   One line per block, tight: the whole structure of a normal template has to be
+   readable without scrolling, because this is the list people reach for most. */
+.nhr-scope .pd-sections { display: flex; flex-direction: column; gap: 3px; }
+.nhr-scope .pd-sec {
+  display: flex; align-items: center; gap: 7px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 9px; background: var(--surface); font-size: 12.5px;
+  transition: background .15s var(--ease), border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.nhr-scope .pd-sec:hover { background: var(--surface-2); border-color: var(--border-strong); }
+/* the same accent the page uses for the selected block, so the two views agree */
+.nhr-scope .pd-sec.is-active { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.nhr-scope .pd-sec.is-active .pd-sec-icon { color: var(--primary); }
+.nhr-scope .pd-sec-icon { display: inline-flex; color: var(--text-3); transition: color .15s var(--ease); }
+/* a badge on a 5px-padded row cannot carry its usual chrome */
+.nhr-scope .pd-sec .badge { padding: 1px 6px; font-size: 10px; }
+
+/* --- drag to reorder --- */
+.nhr-scope .pd-sec { position: relative; }
+.nhr-scope .pd-sec-grip {
+  display: inline-flex; color: var(--text-3); cursor: grab;
+  margin-left: -2px; opacity: .55;
+}
+.nhr-scope .pd-sec:hover .pd-sec-grip { opacity: 1; }
+.nhr-scope .pd-sec:active .pd-sec-grip { cursor: grabbing; }
+/* the row being carried stays visible but recedes */
+.nhr-scope .pd-sec.is-dragging { opacity: .45; }
+/* the insertion point, drawn on the edge the block will land against */
+.nhr-scope .pd-sec.is-over-above::after,
+.nhr-scope .pd-sec.is-over-below::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 2px;
+  background: var(--primary); border-radius: 2px; pointer-events: none;
+}
+.nhr-scope .pd-sec.is-over-above::after { top: -3px; }
+.nhr-scope .pd-sec.is-over-below::after { bottom: -3px; }
+.nhr-scope .pd-sec-name { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nhr-scope .pd-sec-tools { display: inline-flex; gap: 2px; margin-left: auto; }
+
+.nhr-scope .pd-sec-editor { padding-top: 2px; }
+
+/* --- structure drawer ---------------------------------------------------
+   Two regions, each scrolling on its own: the name + block list stay pinned at
+   the top while the selected block's settings scroll under them, so reordering
+   never means scrolling back up past a long editor. */
+.nhr-scope .pd-structure-body {
+  padding: 0; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.nhr-scope .pd-structure-top {
+  flex: 0 0 auto; padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+  max-height: 46vh; overflow-y: auto;
+}
+.nhr-scope .pd-structure-editor {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 14px 20px 20px; background: var(--surface-2);
+}
+.nhr-scope .pd-structure-bar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+}
+.nhr-scope .pd-structure-bar .btn { flex: none; }
+/* the settings panel reads as one card floating on the region behind it */
+.nhr-scope .pd-structure-editor > .pd-sec-editor {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px;
+  animation: pd-expand .18s var(--ease);
+}
+@keyframes pd-expand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- fields inside a block --- */
+.nhr-scope .pd-fields { display: flex; flex-direction: column; gap: 8px; }
+.nhr-scope .pd-field { border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; background: var(--surface-2); }
+.nhr-scope .pd-field-head { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 7px; }
+.nhr-scope .pd-field-head code { font-size: 10.5px; }
+/* auto-fit, not a viewport media query: this grid sits inside the middle column,
+   so it has to reflow on the column's width and not the window's */
+.nhr-scope .pd-field-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+
+/* --- pickable field list --- */
+.nhr-scope .pd-avail {
+  display: flex; flex-direction: column; gap: 3px;
+  max-height: 220px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 10px; padding: 5px; background: var(--surface-2);
+}
+.nhr-scope .pd-avail-item {
+  display: flex; align-items: center; gap: 7px; width: 100%; cursor: pointer;
+  border: 0; background: transparent; border-radius: 7px; padding: 5px 7px;
+  font-size: 12px; text-align: left; color: inherit;
+}
+.nhr-scope .pd-avail-item:hover { background: var(--surface-3); }
+.nhr-scope .pd-avail-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- live preview --- */
+.nhr-scope .pd-preview {
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-3); padding: 10px 4px;
+  /* leaves room for the card's own heading, the note under it and the sticky
+     offset, so the pane never runs past the bottom of the viewport */
+  overflow: auto; max-height: calc(100vh - 178px);
+}
+/* The page sits in the middle of whatever width is left over. The wrapper is
+   given the scaled page size in JS, which is what this centring acts on — a
+   transformed element contributes nothing to layout on its own. */
+.nhr-scope .pd-pane .pd-preview > div { margin-inline: auto; }
+/* The inner page is scaled with a transform, which leaves its original box in
+   flow — so the wrapper would keep the full unscaled height. Letting the page
+   define its own size and clipping at the wrapper keeps the column honest. */
+.nhr-scope .pd-page {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .08);
+  background: #fff; color: #1f2937;
+}
+.nhr-scope .pd-preview-note { margin-top: 7px; font-size: 11px; color: var(--text-3); }
+
+/* --- arrange mode: the page itself is the editor ---------------------------
+   The preview is injected HTML rendered by templateRenderer, so it carries no
+   classes of its own for this — everything hangs off the data-tr-* attributes
+   the renderer stamps and off .is-arrange on the wrapper. */
+/* without this a drag that starts on a word becomes a text drag, and the block
+   never picks up */
+.nhr-scope .pd-preview.is-arrange { user-select: none; }
+.nhr-scope .pd-preview.is-arrange [data-tr-sec] { cursor: grab; }
+.nhr-scope .pd-preview.is-arrange [data-tr-sec]:active { cursor: grabbing; }
+/* The outline is drawn outside the box so a block never shifts on hover, and it
+   is declared transparent up front so the colour has something to animate from —
+   an outline that appears from `none` pops. */
+.nhr-scope .pd-preview.is-arrange [data-tr-sec] {
+  outline: 1px dashed transparent; outline-offset: 2px;
+  transition: outline-color .12s var(--ease), opacity .12s var(--ease);
+}
+.nhr-scope .pd-preview.is-arrange [data-tr-sec]:hover { outline-color: var(--primary); }
+.nhr-scope .pd-preview.is-arrange [data-tr-fld] { outline-offset: 1px; }
+/* the selected block, kept in step with the editor beside it */
+.nhr-scope .pd-preview [data-tr-sec].is-tr-active {
+  outline: 2px solid var(--primary); outline-offset: 2px;
+}
+.nhr-scope .pd-preview .is-tr-dragging { opacity: .4; }
+
+/* --- right-click menu on the preview --- */
+.nhr-scope.pd-ctx {
+  position: fixed; z-index: 9998; min-width: 212px;
+  padding: 5px; border-radius: 11px;
+  border: 1px solid var(--border); background: var(--surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .16), 0 2px 6px rgba(0, 0, 0, .08);
+  animation: pd-ctx-in .1s var(--ease);
+  /* the type submenu expands in place, so the menu has to be able to outgrow
+     the room that was measured for it when it opened */
+  max-height: 76vh; overflow-y: auto;
+}
+/* --- inline submenu (change block type) --- */
+.nhr-scope .pd-ctx-group { display: block; }
+.nhr-scope .pd-ctx-caret { margin-left: auto; transition: transform .15s var(--ease); }
+.nhr-scope .pd-ctx-item.is-open .pd-ctx-caret { transform: rotate(90deg); }
+.nhr-scope .pd-ctx-sub {
+  margin: 2px 0 4px 10px; padding-left: 6px;
+  border-left: 1px solid var(--border);
+  animation: pd-expand .14s var(--ease);
+}
+.nhr-scope .pd-ctx-sub .pd-ctx-item { font-size: 12px; }
+.nhr-scope .pd-ctx-item.is-checked { color: var(--primary); font-weight: 650; }
+@keyframes pd-ctx-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.nhr-scope .pd-ctx-item {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  border: 0; background: transparent; border-radius: 7px;
+  padding: 7px 9px; font-size: 12.5px; font-weight: 550;
+  color: var(--text-1); text-align: left; cursor: pointer;
+}
+.nhr-scope .pd-ctx-item > svg { flex: none; color: var(--text-3); }
+.nhr-scope .pd-ctx-item:hover:not(:disabled) { background: var(--surface-3); }
+.nhr-scope .pd-ctx-item:disabled { opacity: .4; cursor: not-allowed; }
+.nhr-scope .pd-ctx-item.is-danger { color: var(--danger); }
+.nhr-scope .pd-ctx-item.is-danger > svg { color: var(--danger); }
+.nhr-scope .pd-ctx-item.is-danger:hover:not(:disabled) { background: rgba(220, 71, 71, .08); }
+.nhr-scope .pd-ctx-sep { height: 1px; margin: 4px 6px; background: var(--border); }
+
+/* What follows the cursor during a drag. The default drag image is a snapshot
+   of the element, and the element here is a scaled slice of an A4 page — this
+   is offered to setDragImage() instead. It has to be in the document to be
+   snapshotted, hence parked off-screen rather than hidden. */
+.nhr-scope.pd-drag-chip {
+  position: fixed; top: -1000px; left: -1000px; z-index: 9999;
+  max-width: 220px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  padding: 6px 10px; border-radius: 8px;
+  background: var(--primary, #5560e8); color: #fff;
+  font: 600 12px/1.2 'Segoe UI', system-ui, sans-serif;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .22);
+  pointer-events: none;
+}
+
+/* the insertion point: blocks take a full-width rule, cells a vertical one */
+.nhr-scope .pd-preview [data-tr-sec] { position: relative; }
+.nhr-scope .pd-preview .is-tr-before::before,
+.nhr-scope .pd-preview .is-tr-after::before {
+  content: ''; position: absolute; background: var(--primary);
+  border-radius: 2px; pointer-events: none; z-index: 2;
+  box-shadow: 0 0 0 2px rgba(85, 96, 232, .18);
+  animation: pd-drop-in .12s var(--ease);
+}
+@keyframes pd-drop-in { from { opacity: 0; } to { opacity: 1; } }
+.nhr-scope .pd-preview [data-tr-sec]:not([data-tr-fld]).is-tr-before::before { left: 0; right: 0; top: -2px; height: 2px; }
+.nhr-scope .pd-preview [data-tr-sec]:not([data-tr-fld]).is-tr-after::before { left: 0; right: 0; bottom: -2px; height: 2px; }
+.nhr-scope .pd-preview [data-tr-fld].is-tr-before::before { top: 0; bottom: 0; left: -2px; width: 2px; }
+.nhr-scope .pd-preview [data-tr-fld].is-tr-after::before { top: 0; bottom: 0; right: -2px; width: 2px; }
+/* a table heading is a <th>, which cannot be a positioning context in every
+   engine unless it is told to be */
+.nhr-scope .pd-preview th[data-tr-fld] { position: relative; }
+
+/* Motion here is feedback — where a block went, which panel opened — never
+   decoration. Asked to stop, it all stops; the state changes just as much. */
+@media (prefers-reduced-motion: reduce) {
+  .nhr-scope .pd-stat,
+  .nhr-scope .drawer,
+  .nhr-scope .overlay,
+  .nhr-scope .pd-sec,
+  .nhr-scope .pd-tpl,
+  .nhr-scope .pd-ctx-caret,
+  .nhr-scope .pd-preview.is-arrange [data-tr-sec] { transition: none; }
+  .nhr-scope.pd-ctx,
+  .nhr-scope .pd-ctx-sub,
+  .nhr-scope .pd-structure-editor > .pd-sec-editor,
+  .nhr-scope .pd-preview .is-tr-before::before,
+  .nhr-scope .pd-preview .is-tr-after::before { animation: none; }
+}

@@ -4,9 +4,9 @@ import { Button } from '../../core/controls/Button.jsx'
 import { DateInput, SelectInput, TextArea } from '../../core/controls/inputs.jsx'
 import { Alert, Badge, Card, Loading, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
-import { runHook } from '../../core/hooks/hookBridge.js'
 import { useLookup } from '../../core/hooks/useLookup.js'
 import { useRecordForm } from '../../core/hooks/useRecordForm.js'
+import { useScreenHooks } from '../../core/hooks/useScreenHooks.js'
 import { ConfigForm, DynamicField } from '../../config/DynamicField.jsx'
 import { useScreenRules } from '../../config/useScreenRules.js'
 import { inclusiveDays, statusTone } from './leaveShared.jsx'
@@ -57,6 +57,9 @@ export default function LeaveFormScreen() {
   })
 
   const canEdit = has('hr.leave.edit')
+
+  // Every hook slot this screen has. See core/hooks/useScreenHooks.js.
+  const hooks = useScreenHooks(SCREEN_KEY, { record, canEdit })
   const isClosed = record.form.status && record.form.status !== 'Pending'
 
   // Derived from the range rather than stored, so the shown count can never drift from the
@@ -81,7 +84,7 @@ export default function LeaveFormScreen() {
       return
     }
 
-    const before = await runHook(`${SCREEN_KEY}.beforeSave`, { form: record.form })
+    const before = await hooks.beforeSave()
     if (before.cancelSave) {
       if (before.message) ui.error(before.message)
       return
@@ -98,7 +101,7 @@ export default function LeaveFormScreen() {
     const saved = await record.save(payload)
     if (!saved) return
 
-    const after = await runHook(`${SCREEN_KEY}.afterSave`, { form: payload, response: saved })
+    const after = await hooks.afterSave(payload, saved)
     ui.toast(after.message ?? 'Leave request saved.')
 
     if (after.cancelNavigation) return
@@ -124,8 +127,8 @@ export default function LeaveFormScreen() {
                 id={fieldId}
                 invalid={invalid}
                 options={employees.options}
-                disabled={!canEdit || isClosed || employees.busy}
-                {...record.bind('employeeId')}
+                disabled={hooks.locked('employeeId') || isClosed || employees.busy}
+                {...hooks.fieldProps('employeeId')}
               />
             )}
           </DynamicField>
@@ -142,21 +145,31 @@ export default function LeaveFormScreen() {
                 id={fieldId}
                 invalid={invalid}
                 options={leaveTypes.options}
-                disabled={!canEdit || isClosed || leaveTypes.busy}
-                {...record.bind('leaveTypeId')}
+                disabled={hooks.locked('leaveTypeId') || isClosed || leaveTypes.busy}
+                {...hooks.fieldProps('leaveTypeId')}
               />
             )}
           </DynamicField>
 
           <DynamicField fieldKey="fromDate" label="From date" required defaultSeq={30} error={record.errors.fromDate}>
             {({ id: fieldId, invalid }) => (
-              <DateInput id={fieldId} invalid={invalid} disabled={!canEdit || isClosed} {...record.bind('fromDate')} />
+              <DateInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={hooks.locked('fromDate') || isClosed}
+                {...hooks.fieldProps('fromDate')}
+              />
             )}
           </DynamicField>
 
           <DynamicField fieldKey="toDate" label="To date" required defaultSeq={40} error={record.errors.toDate}>
             {({ id: fieldId, invalid }) => (
-              <DateInput id={fieldId} invalid={invalid} disabled={!canEdit || isClosed} {...record.bind('toDate')} />
+              <DateInput
+                id={fieldId}
+                invalid={invalid}
+                disabled={hooks.locked('toDate') || isClosed}
+                {...hooks.fieldProps('toDate')}
+              />
             )}
           </DynamicField>
 
@@ -172,8 +185,8 @@ export default function LeaveFormScreen() {
                 id={fieldId}
                 invalid={invalid}
                 maxLength={500}
-                disabled={!canEdit || isClosed}
-                {...record.bind('reason')}
+                disabled={hooks.locked('reason') || isClosed}
+                {...hooks.fieldProps('reason')}
               />
             )}
           </DynamicField>

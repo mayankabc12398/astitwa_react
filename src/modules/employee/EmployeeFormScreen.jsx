@@ -1,15 +1,17 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../core/auth/AuthContext.js'
 import { Button } from '../../core/controls/Button.jsx'
 import { DateInput, NumberInput, SelectInput, TextInput } from '../../core/controls/inputs.jsx'
 import { Alert, Card, Loading, PageHeader } from '../../core/controls/layout.jsx'
 import { useUi } from '../../core/controls/uiContext.js'
-import { fieldHookKey, runHook } from '../../core/hooks/hookBridge.js'
 import { invalidateLookup, useLookup } from '../../core/hooks/useLookup.js'
 import { useRecordForm } from '../../core/hooks/useRecordForm.js'
+import { useScreenHooks } from '../../core/hooks/useScreenHooks.js'
 import { ConfigForm, DynamicField } from '../../config/DynamicField.jsx'
 import { useScreenRules } from '../../config/useScreenRules.js'
+import { CustomFieldSection } from '../../config/customFields/CustomFieldSection.jsx'
+import { useCustomFields, useCustomValues } from '../../config/customFields/useCustomFields.js'
 
 const SCREEN_KEY = 'hr.employee'
 
@@ -69,6 +71,12 @@ export default function EmployeeFormScreen() {
   const designations = useLookup('/hr/designation/lookup')
   const managers = useLookup('/hr/employee/lookup')
 
+  // Fields this tenant added to the employee screen. They render beside the compiled ones
+  // and are written after the record's own save, because a value needs a record to hang on.
+  const custom = useCustomFields(SCREEN_KEY)
+  const customValues = useCustomValues(SCREEN_KEY, id)
+  const [customErrors, setCustomErrors] = useState({})
+
   const record = useRecordForm({
     path: '/hr/employee',
     id,
@@ -85,32 +93,23 @@ export default function EmployeeFormScreen() {
   })
 console.log('record', record)
   const canEdit = has('hr.employee.edit')
-  const onLoadFired = useRef(false)
 
-  // hr.employee.onLoad — fires once, after the record is in hand.
-  useEffect(() => {
-    if (record.loading || onLoadFired.current) return
-    onLoadFired.current = true
-
-    runHook(`${SCREEN_KEY}.onLoad`, { form: record.form }).then((result) => {
-      if (result.form) record.setForm((current) => ({ ...current, ...result.form }))
-      if (result.message) ui.toast(result.message)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [record.loading])
+  /*
+   * Every hook slot this screen has.
+   *
+   * The plumbing — the debounce timers, which bag a field key belongs to, what a result may
+   * carry — is Layer 1 rather than something this file owns, so a slot added there reaches
+   * every form screen at once instead of being copied into each.
+   */
+  const hooks = useScreenHooks(SCREEN_KEY, {
+    record,
+    customFields: custom.fields,
+    customValues,
+    canEdit,
+  })
 
   if (record.loading) return <Loading />
   if (record.loadError) return <Alert tone="error">{record.loadError.message}</Alert>
-
-  // hr.employee.field.<fieldKey>.onBlur
-  async function onFieldBlur(fieldKey) {
-    const result = await runHook(fieldHookKey(SCREEN_KEY, fieldKey), {
-      form: record.form,
-      value: record.form[fieldKey],
-    })
-    if (result.form) record.setForm((current) => ({ ...current, ...result.form }))
-    if (result.message) ui.toast(result.message)
-  }
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -122,7 +121,7 @@ console.log('record', record)
     }
 
     // hr.employee.beforeSave — a client script may stop the save outright.
-    const before = await runHook(`${SCREEN_KEY}.beforeSave`, { form: record.form })
+    const before = await hooks.beforeSave()
     if (before.cancelSave) {
       if (before.message) ui.error(before.message)
       return
@@ -157,10 +156,21 @@ console.log('record', record)
     const saved = await record.save(payload)
     if (!saved) return
 
+    // The record has an id only now, so its custom values are written second. A failure here
+    // leaves the employee saved and the user on the form with the offending field marked —
+    // rolling the employee back would be worse, because the record itself was accepted.
+    const written = await customValues.save(saved.employeeId, custom.fields)
+    if (!written.ok) {
+      setCustomErrors(written.errors)
+      ui.error(written.message ?? 'The employee was saved, but its extra fields were not.')
+      return
+    }
+    setCustomErrors({})
+
     invalidateLookup('/hr/employee/lookup')
 
     // hr.employee.afterSave — the script decides where the user lands next.
-    const after = await runHook(`${SCREEN_KEY}.afterSave`, { form: payload, response: saved })
+    const after = await hooks.afterSave(payload, saved)
     if (after.message) ui.toast(after.message)
     else ui.toast('Employee saved.')
 
@@ -188,9 +198,8 @@ console.log('record', record)
                 id={fieldId}
                 invalid={invalid}
                 maxLength={40}
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('employeeCode')}
-                {...record.bind('employeeCode')}
+                disabled={hooks.locked('employeeCode')}
+                {...hooks.fieldProps('employeeCode')}
               />
             )}
           </DynamicField>
@@ -201,9 +210,8 @@ console.log('record', record)
                 id={fieldId}
                 invalid={invalid}
                 maxLength={180}
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('fullName')}
-                {...record.bind('fullName')}
+                disabled={hooks.locked('fullName')}
+                {...hooks.fieldProps('fullName')}
               />
             )}
           </DynamicField>
@@ -213,9 +221,8 @@ console.log('record', record)
               <DateInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('dob')}
-                {...record.bind('dob')}
+                disabled={hooks.locked('dob')}
+                {...hooks.fieldProps('dob')}
               />
             )}
           </DynamicField>
@@ -230,9 +237,8 @@ console.log('record', record)
               <DateInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('dateOfJoining')}
-                {...record.bind('dateOfJoining')}
+                disabled={hooks.locked('dateOfJoining')}
+                {...hooks.fieldProps('dateOfJoining')}
               />
             )}
           </DynamicField>
@@ -242,10 +248,9 @@ console.log('record', record)
               <SelectInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit || departments.busy}
+                disabled={hooks.locked('departmentId') || departments.busy}
                 options={departments.options}
-                onBlur={() => onFieldBlur('departmentId')}
-                {...record.bind('departmentId')}
+                {...hooks.fieldProps('departmentId')}
               />
             )}
           </DynamicField>
@@ -255,10 +260,9 @@ console.log('record', record)
               <SelectInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit || designations.busy}
+                disabled={hooks.locked('designationId') || designations.busy}
                 options={designations.options}
-                onBlur={() => onFieldBlur('designationId')}
-                {...record.bind('designationId')}
+                {...hooks.fieldProps('designationId')}
               />
             )}
           </DynamicField>
@@ -277,10 +281,9 @@ console.log('record', record)
               <SelectInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit || managers.busy}
+                disabled={hooks.locked('reportingManagerId') || managers.busy}
                 options={managers.options.filter((o) => String(o.value) !== String(record.form.employeeId))}
-                onBlur={() => onFieldBlur('reportingManagerId')}
-                {...record.bind('reportingManagerId')}
+                {...hooks.fieldProps('reportingManagerId')}
               />
             )}
           </DynamicField>
@@ -293,9 +296,8 @@ console.log('record', record)
                 invalid={invalid}
                 maxLength={30}
                 inputMode="tel"
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('mobile')}
-                {...record.bind('mobile')}
+                disabled={hooks.locked('mobile')}
+                {...hooks.fieldProps('mobile')}
               />
             )}
           </DynamicField>
@@ -307,9 +309,8 @@ console.log('record', record)
                 type="email"
                 invalid={invalid}
                 maxLength={150}
-                disabled={!canEdit}
-                onBlur={() => onFieldBlur('email')}
-                {...record.bind('email')}
+                disabled={hooks.locked('email')}
+                {...hooks.fieldProps('email')}
               />
             )}
           </DynamicField>
@@ -324,11 +325,10 @@ console.log('record', record)
               <SelectInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
+                disabled={hooks.locked('employmentStatus')}
                 options={STATUS_OPTIONS}
                 placeholder="— select —"
-                onBlur={() => onFieldBlur('employmentStatus')}
-                {...record.bind('employmentStatus')}
+                {...hooks.fieldProps('employmentStatus')}
               />
             )}
           </DynamicField>
@@ -344,12 +344,11 @@ console.log('record', record)
               <NumberInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
+                disabled={hooks.locked('grossCtc')}
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                onBlur={() => onFieldBlur('grossCtc')}
-                {...record.bind('grossCtc')}
+                {...hooks.fieldProps('grossCtc')}
               />
             )}
           </DynamicField>
@@ -359,12 +358,11 @@ console.log('record', record)
               <NumberInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
+                disabled={hooks.locked('hra')}
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                onBlur={() => onFieldBlur('hra')}
-                {...record.bind('hra')}
+                {...hooks.fieldProps('hra')}
               />
             )}
           </DynamicField>
@@ -374,12 +372,11 @@ console.log('record', record)
               <NumberInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
+                disabled={hooks.locked('tds')}
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                onBlur={() => onFieldBlur('tds')}
-                {...record.bind('tds')}
+                {...hooks.fieldProps('tds')}
               />
             )}
           </DynamicField>
@@ -389,15 +386,27 @@ console.log('record', record)
               <NumberInput
                 id={fieldId}
                 invalid={invalid}
-                disabled={!canEdit}
+                disabled={hooks.locked('netSalary')}
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                onBlur={() => onFieldBlur('netSalary')}
-                {...record.bind('netSalary')}
+                {...hooks.fieldProps('netSalary')}
               />
             )}
           </DynamicField>
+
+          {/* Inside the same ConfigForm and using the same controls, so a field this tenant
+              added is indistinguishable from one the product shipped with. Its sequence
+              numbers start above the compiled ones, which is what puts it last. */}
+          <CustomFieldSection
+            fields={custom.fields}
+            values={customValues.values}
+            errors={customErrors}
+            disabled={!canEdit}
+            onChange={customValues.setValue}
+            onFieldBlur={hooks.onFieldBlur}
+            onFieldChange={hooks.onFieldChange}
+          />
         </ConfigForm>
 
         <div className="form-actions">

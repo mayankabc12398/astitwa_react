@@ -1,0 +1,115 @@
+/* The script editor shell: a toolbar, the editor, and a status line. */
+
+.script-editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--c-surface);
+}
+
+.script-editor__bar,
+.script-editor__status {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: var(--c-surface-alt);
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.script-editor__bar {
+  border-bottom: 1px solid var(--c-border);
+}
+
+.script-editor__status {
+  border-top: 1px solid var(--c-border);
+  justify-content: flex-end;
+}
+
+.script-editor__name {
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.script-editor__spacer {
+  flex: 1;
+}
+
+.script-editor__hint {
+  font-variant-numeric: tabular-nums;
+}
+
+.script-editor__body {
+  flex: 1;
+  min-height: 0;
+}
+
+/*
+ * Full screen is a class on the same element rather than a portal, so the Monaco instance is
+ * never unmounted — expanding keeps the undo history, the cursor and the selection.
+ *
+ * position: fixed escapes .modal__body's overflow because no ancestor carries a transform,
+ * filter or containment, which would otherwise make this a containing block. Sitting one
+ * above --z-modal puts it over the dialog that hosts it.
+ */
+.script-editor--full {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 1);
+  border-radius: 0;
+  border: 0;
+}
+
+/*
+ * The dark theme is the editor's alone — the product has no dark mode, and a dialog that
+ * inverted around one control would read as a rendering fault. So only the shell that frames
+ * Monaco changes.
+ *
+ * These values are the ones the hrsuite-dark theme paints inside the editor: #282c34 for the
+ * text surface, #21252b for chrome around it, #181a1f for the rules. They have to be kept in
+ * step with the `colors` block in MonacoScriptEditor.jsx, or a seam shows where the toolbar
+ * meets the first line of the script.
+ *
+ * The variables are redeclared rather than the rules repeated, so the light theme above stays
+ * the single description of the layout.
+ */
+.script-editor--dark {
+  --se-surface: #282c34;
+  --se-bar: #21252b;
+  --se-border: #181a1f;
+  --se-text: #abb2bf;
+  --se-text-muted: #7f848e;
+
+  border-color: var(--se-border);
+  background: var(--se-surface);
+  color-scheme: dark;
+}
+
+.script-editor--dark .script-editor__bar,
+.script-editor--dark .script-editor__status {
+  background: var(--se-bar);
+  color: var(--se-text-muted);
+  border-color: var(--se-border);
+}
+
+.script-editor--dark .script-editor__name {
+  color: var(--se-text);
+}
+
+/* The ghost buttons inherit a light palette they cannot read from here. */
+.script-editor--dark .script-editor__bar .btn {
+  color: var(--se-text);
+  border-color: transparent;
+  background: transparent;
+}
+
+.script-editor--dark .script-editor__bar .btn:hover:not(:disabled) {
+  background: #2c313a;
+}
+
+.script-editor--dark .script-editor__bar .btn:disabled {
+  color: var(--se-text-muted);
+}
