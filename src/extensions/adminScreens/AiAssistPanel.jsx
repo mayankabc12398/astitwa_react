@@ -43,13 +43,29 @@ function segments(text) {
   return parts
 }
 
-export function AiAssistPanel({ language, code, selection, context, onInsert, onReplace, onClose }) {
+export function AiAssistPanel({
+  language,
+  code,
+  selection,
+  context,
+  // Which conversation this is. Absent means the panel behaves as it always did: the thread
+  // lives for as long as the dialog does and is never written down.
+  threadKey,
+  threadTitle,
+  onInsert,
+  onReplace,
+  onClose,
+}) {
   const [available, setAvailable] = useState(null)
   const [model, setModel] = useState('')
   const [turns, setTurns] = useState([])
   const [question, setQuestion] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // Which thread the turns on screen came from. Loading is derived from it rather than
+  // being its own flag: a flag would have to be raised synchronously inside the effect, and
+  // a setState there costs an extra render pass on every open.
+  const [loadedKey, setLoadedKey] = useState(null)
   const endRef = useRef(null)
 
   // The answer as it is being written, revealed a few characters at a time.
@@ -91,6 +107,42 @@ export function AiAssistPanel({ language, code, selection, context, onInsert, on
       .catch(() => setAvailable(false))
     return () => controller.abort()
   }, [])
+
+  /*
+   * The conversation as it was left.
+   *
+   * Loaded per threadKey, so opening a different hook shows that hook's thread rather than
+   * the previous one's. A thread that does not exist yet answers with an empty list, which
+   * is the same thing the panel used to start with.
+   */
+  useEffect(() => {
+    if (!threadKey) return undefined
+
+    const controller = new AbortController()
+
+    api
+      .get('/ai/thread', { params: { key: threadKey, limit: 100 }, signal: controller.signal })
+      .then((data) => {
+        setTurns(
+          (data?.messages ?? []).map((m) => ({
+            role: m.role === 'model' ? 'model' : 'user',
+            text: m.body ?? '',
+          })),
+        )
+        setLoadedKey(threadKey)
+      })
+      .catch((cause) => {
+        // A thread that cannot be read is not a reason to refuse to answer questions: the
+        // panel opens empty and the next answer starts a fresh one.
+        if (cause?.name === 'AbortError') return
+        setTurns([])
+        setLoadedKey(threadKey)
+      })
+
+    return () => controller.abort()
+  }, [threadKey])
+
+  const loadingThread = Boolean(threadKey) && loadedKey !== threadKey
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' })
@@ -158,6 +210,8 @@ export function AiAssistPanel({ language, code, selection, context, onInsert, on
           selection: selectionRef.current ?? '',
           question: asked,
           context: context ?? '',
+          threadKey: threadKey ?? '',
+          title: threadTitle ?? context ?? '',
           history,
         },
         (event) => {
@@ -184,6 +238,27 @@ export function AiAssistPanel({ language, code, selection, context, onInsert, on
     else if (answer) setTurns((current) => [...current, { role: 'model', text: answer }])
   }
 
+  /**
+   * Forget this conversation.
+   *
+   * A real delete on the server, because "clear" has to mean the text is gone rather than
+   * hidden. Only this user's own thread can be reached — the procedure filters on both the
+   * tenant and the signed-in user.
+   */
+  async function clearThread() {
+    if (!threadKey || busy) return
+
+    setTurns([])
+    setError('')
+
+    try {
+      await api.del('/ai/thread', { params: { key: threadKey } })
+    } catch {
+      // The screen is already clear. A thread that outlives its delete resurfaces on the
+      // next open, which is visible enough without an error nobody can act on.
+    }
+  }
+
   const actions = QUICK_ACTIONS[language] ?? QUICK_ACTIONS.javascript
 
   return (
@@ -195,6 +270,17 @@ export function AiAssistPanel({ language, code, selection, context, onInsert, on
         <strong className="ai-panel__title">Assistant</strong>
         {model && <span className="ai-panel__model">{model}</span>}
         <span className="ai-panel__spacer" />
+        {threadKey && turns.length > 0 && (
+          <button
+            type="button"
+            className="ai-panel__close"
+            onClick={clearThread}
+            disabled={busy}
+            title="Delete this saved conversation"
+          >
+            Clear
+          </button>
+        )}
         <button type="button" className="ai-panel__close" onClick={onClose} title="Hide the assistant">
           ✕
         </button>
@@ -209,10 +295,13 @@ export function AiAssistPanel({ language, code, selection, context, onInsert, on
       {available && (
         <>
           <div className="ai-panel__thread">
-            {turns.length === 0 && (
+            {loadingThread && <div className="ai-panel__empty">Loading this conversation…</div>}
+
+            {!loadingThread && turns.length === 0 && (
               <div className="ai-panel__empty">
                 Ask about what is in the editor. It is sent with every question, and the selection too when
                 there is one.
+                {threadKey && ' This conversation is saved against what you are editing, and will be here next time.'}
               </div>
             )}
 

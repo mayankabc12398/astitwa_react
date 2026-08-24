@@ -166,6 +166,10 @@ export default function FieldBuilderScreen() {
 
   const customCount = fields.length
 
+  // Which row is being dragged, which row it is over, and which side of it. null id means
+  // nothing is being dragged, which is what every handler below checks first.
+  const [drag, setDrag] = useState({ id: null, overId: null, edge: null })
+
   // A draft is folded into the preview so an author sees the field they are describing
   // before it exists. It is marked, because a preview that cannot be told from the saved
   // layout would be a preview nobody can trust.
@@ -270,14 +274,13 @@ export default function FieldBuilderScreen() {
     }
   }
 
-  async function move(field, delta) {
-    const custom = fields.slice()
-    const index = custom.findIndex((f) => f.fieldId === field.fieldId)
-    const target = index + delta
-    if (index < 0 || target < 0 || target >= custom.length) return
-
-    ;[custom[index], custom[target]] = [custom[target], custom[index]]
-
+  /**
+   * Writes an order back.
+   *
+   * Shared by the arrows and by dragging, so the two cannot drift apart — and so a screen
+   * reordered either way renumbers by the same rule.
+   */
+  async function persistOrder(custom) {
     // The order is re-derived from the array rather than nudging one number, so a list that
     // has drifted out of step repairs itself the first time anything is moved.
     const renumbered = custom.map((f, i) => ({ ...f, seqNo: 1000 + i * 10 }))
@@ -292,6 +295,80 @@ export default function FieldBuilderScreen() {
       toast.error('Could not save the order', cause?.message)
       loadLayout(screenKey)
     }
+  }
+
+  async function move(field, delta) {
+    const custom = fields.slice()
+    const index = custom.findIndex((f) => f.fieldId === field.fieldId)
+    const target = index + delta
+    if (index < 0 || target < 0 || target >= custom.length) return
+
+    ;[custom[index], custom[target]] = [custom[target], custom[index]]
+    await persistOrder(custom)
+  }
+
+  /*
+   * Dragging.
+   *
+   * Only the tenant's own fields move. A compiled field is an anchor — it is declared in
+   * code and the screen renders it where the code says, so it refuses the drop rather than
+   * pretending to accept one and snapping back.
+   *
+   * The arrows stay: a pointer is not the only way to reorder a list, and drag-and-drop has
+   * no keyboard.
+   */
+  function startDrag(event, field) {
+    if (!field.isCustom || busy) {
+      event.preventDefault()
+      return
+    }
+
+    // Firefox refuses to start a drag unless something is on the transfer.
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', String(field.fieldId))
+    setDrag({ id: field.fieldId, overId: null, edge: null })
+  }
+
+  function dragOverRow(event, field) {
+    // Not calling preventDefault is what makes a row refuse the drop, so compiled rows and
+    // a drag that never started both fall through here untouched.
+    if (drag.id === null || !field.isCustom) return
+
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+
+    // Above the midpoint means "land before this row", below means after. The line the CSS
+    // draws is on the same side, so what is shown is what will happen.
+    const box = event.currentTarget.getBoundingClientRect()
+    const edge = event.clientY < box.top + box.height / 2 ? 'before' : 'after'
+
+    if (drag.overId !== field.fieldId || drag.edge !== edge) {
+      setDrag((current) => ({ ...current, overId: field.fieldId, edge }))
+    }
+  }
+
+  function dropOnRow(event, field) {
+    if (drag.id === null || !field.isCustom) return
+    event.preventDefault()
+
+    const edge = drag.edge ?? 'before'
+    const custom = fields.slice()
+    const from = custom.findIndex((f) => f.fieldId === drag.id)
+    const to = custom.findIndex((f) => f.fieldId === field.fieldId)
+
+    setDrag({ id: null, overId: null, edge: null })
+    if (from < 0 || to < 0) return
+
+    const [moved] = custom.splice(from, 1)
+    // The target index shifts by one when the row was taken from above it.
+    const at = to + (edge === 'after' ? 1 : 0) - (from < to ? 1 : 0)
+    custom.splice(at, 0, moved)
+
+    // A drop that changed nothing is not worth a round trip, and re-saving would renumber
+    // the whole list for no reason.
+    if (custom.every((f, i) => f.fieldId === fields[i].fieldId)) return
+
+    persistOrder(custom)
   }
 
   /** A calculated field as the real form shows it: read-only, and recalculating as you type. */
@@ -433,7 +510,32 @@ export default function FieldBuilderScreen() {
                 {rows.map((f, i) => {
                   const customIndex = fields.findIndex((c) => c.fieldId === f.fieldId)
                   return (
-                    <div key={f.isCustom ? `c${f.fieldId}` : `s${f.fieldKey}`} className={`fb-row ${f.isCustom ? '' : 'is-system'}`}>
+                    <div
+                      key={f.isCustom ? `c${f.fieldId}` : `s${f.fieldKey}`}
+                      className={[
+                        'fb-row',
+                        f.isCustom ? 'is-custom' : 'is-system',
+                        drag.id !== null && drag.id === f.fieldId ? 'is-dragging' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      draggable={Boolean(f.isCustom) && !busy}
+                      // Where the row would land, read by the CSS that draws the line.
+                      data-over={
+                        f.isCustom && drag.id !== null && drag.overId === f.fieldId && drag.id !== f.fieldId
+                          ? drag.edge
+                          : undefined
+                      }
+                      onDragStart={(e) => startDrag(e, f)}
+                      onDragOver={(e) => dragOverRow(e, f)}
+                      onDragLeave={() =>
+                        setDrag((current) =>
+                          current.overId === f.fieldId ? { ...current, overId: null, edge: null } : current,
+                        )
+                      }
+                      onDrop={(e) => dropOnRow(e, f)}
+                      onDragEnd={() => setDrag({ id: null, overId: null, edge: null })}
+                    >
                       <span className="fb-grip" aria-hidden="true">
                         <GripVertical size={14} />
                         <span className="fb-row-num">{i + 1}</span>

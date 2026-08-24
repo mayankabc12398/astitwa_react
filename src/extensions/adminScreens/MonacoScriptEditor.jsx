@@ -243,6 +243,10 @@ export function MonacoScriptEditor({
   readOnly = false,
   language = 'javascript',
   context = '',
+  // Which assistant conversation belongs to what is being edited. Passed straight through:
+  // the editor has no idea whether it is holding a hook or an endpoint, and should not.
+  threadKey = '',
+  threadTitle = '',
 }) {
   const [expanded, setExpanded] = useState(false)
   const [assistant, setAssistant] = useState(false)
@@ -513,6 +517,8 @@ export function MonacoScriptEditor({
             code={value}
             selection={selection}
             context={context}
+            threadKey={threadKey}
+            threadTitle={threadTitle}
             onInsert={insertAtCaret}
             onReplace={replaceAll}
             onClose={() => setAssistant(false)}

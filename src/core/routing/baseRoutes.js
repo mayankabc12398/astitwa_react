@@ -34,6 +34,17 @@ export function registerBaseRoutes() {
       permission: 'hr.designation.view',
       load: () => import('../../modules/designation/DesignationFormScreen.jsx'),
     },
+    // Registration first: it is the screen the front desk lives on.
+    {
+      path: '/hr/patient',
+      permission: 'hr.patient.view',
+      load: () => import('../../modules/patient/PatientListScreen.jsx'),
+    },
+    {
+      path: '/hr/patient/:id',
+      permission: 'hr.patient.view',
+      load: () => import('../../modules/patient/PatientFormScreen.jsx'),
+    },
     {
       path: '/hr/employee',
       permission: 'hr.employee.view',

@@ -457,6 +457,9 @@ export default function CustomApiScreen() {
               language="mysql"
               value={editing.sqlText}
               onChange={(next) => setField('sqlText', next)}
+              context={editing.slug ? `endpoint /api/x/${editing.slug}` : 'a new endpoint'}
+              threadKey={`endpoint:${editing.slug || 'new'}`}
+              threadTitle={editing.title || editing.slug || 'New endpoint'}
             />
           </Field>
 

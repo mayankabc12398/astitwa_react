@@ -1227,7 +1227,10 @@
 @media (hover: none) { .nhr-scope .fb-row { cursor: default; } }
 
 .nhr-scope .fb-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
-.nhr-scope .fb-row.is-system { background: var(--surface-2); }
+/* A compiled field is an anchor: it cannot be dragged, so it must not offer to be. */
+.nhr-scope .fb-row.is-system { background: var(--surface-2); cursor: default; }
+.nhr-scope .fb-row.is-system .fb-grip { cursor: default; }
+.nhr-scope .fb-row.is-system:active { cursor: default; }
 .nhr-scope .fb-row.is-custom { box-shadow: inset 3px 0 0 var(--primary); }
 .nhr-scope .fb-row.is-custom:hover { box-shadow: inset 3px 0 0 var(--primary), var(--shadow-xs); }
 .nhr-scope .fb-row.is-active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-ring); }

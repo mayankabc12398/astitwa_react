@@ -456,7 +456,15 @@ export default function ScriptHooksScreen() {
 
           <Field label="Script" htmlFor="scriptBody">
             {/* The editor draws its own frame — it has to keep one in full screen too. */}
-            <MonacoScriptEditor value={editing.scriptBody} onChange={(next) => setField('scriptBody', next)} />
+            <MonacoScriptEditor
+              value={editing.scriptBody}
+              onChange={(next) => setField('scriptBody', next)}
+              context={`${editing.hookKey} (${editing.runOn})`}
+              // Keyed by hook key rather than hook id, so the conversation that produced a
+              // script is still there after the first save turns id 0 into a real one.
+              threadKey={`hook:${editing.hookKey}`}
+              threadTitle={`Hook ${editing.hookKey}`}
+            />
           </Field>
 
           <Field label="Sample ctx.form for the test run" htmlFor="sample">

@@ -217,6 +217,31 @@
                     }
                   }
                 }
+
+                // What the script wants said under a control, and what it wants the control
+                // marked with:
+                //   return { hints: { address: '31 / 50' }, errors: { address: 'Too long.' } }
+                //
+                // Unlike form and custom these are not values, so they do NOT go back into
+                // ctx: a later script in the chain is captioning the same field, not reading
+                // what the last one said about it. Last writer on a key wins.
+                if (returned.hints && typeof returned.hints === 'object') {
+                  if (!merged.hints) merged.hints = {}
+                  for (var hk in returned.hints) {
+                    if (Object.prototype.hasOwnProperty.call(returned.hints, hk)) {
+                      merged.hints[hk] = returned.hints[hk]
+                    }
+                  }
+                }
+
+                if (returned.errors && typeof returned.errors === 'object') {
+                  if (!merged.errors) merged.errors = {}
+                  for (var ek in returned.errors) {
+                    if (Object.prototype.hasOwnProperty.call(returned.errors, ek)) {
+                      merged.errors[ek] = returned.errors[ek]
+                    }
+                  }
+                }
               }
 
               if (merged.cancelSave) break
