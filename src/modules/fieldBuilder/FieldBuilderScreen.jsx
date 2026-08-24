@@ -35,6 +35,46 @@ const SURFACE_KEY = { form: 'showInForm', detail: 'showInDetail', print: 'showIn
 /** One shared empty array, so "no fields yet" keeps a stable identity between renders. */
 const EMPTY_FIELDS = []
 
+/**
+ * New sequence numbers for a reordered list, section by section.
+ *
+ * Numbering the whole list 1000, 1010, 1020… is what it used to do, and that is correct only
+ * while every custom field lives after every compiled one. A field placed between two
+ * compiled fields — which the editor now lets an author do — would be thrown to the bottom of
+ * the form the first time anything was dragged.
+ *
+ * So a section that has compiled fields keeps the positions its custom fields already hold
+ * and hands them out in the new order: the field moves, the slot it moves into is one the
+ * author already chose. A section of the tenant's own has no such constraint and is numbered
+ * from a base of its own, well clear of the compiled ranges.
+ */
+function renumberBySection(custom, compiledFields = []) {
+  const groups = new Map()
+  for (const field of custom) {
+    const key = (field.sectionKey ?? '').trim()
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(field)
+  }
+
+  const seqByField = new Map()
+  let ownSection = 0
+
+  for (const [key, group] of groups) {
+    const compiled = compiledFields.some((c) => (c.sectionKey ?? '') === key)
+
+    if (compiled) {
+      const slots = group.map((f) => f.seqNo ?? 1000).sort((a, b) => a - b)
+      group.forEach((f, i) => seqByField.set(f.fieldId, slots[i]))
+    } else {
+      const base = 1000 + ownSection * 100
+      ownSection += 1
+      group.forEach((f, i) => seqByField.set(f.fieldId, base + i * 10))
+    }
+  }
+
+  return custom.map((f) => ({ ...f, seqNo: seqByField.get(f.fieldId) ?? f.seqNo }))
+}
+
 function SurfaceBadges({ field }) {
   return (
     <>
@@ -151,6 +191,11 @@ export default function FieldBuilderScreen() {
   const screen = screens.find((s) => s.screenKey === screenKey)
   const anchors = useMemo(() => screen?.compiledFieldKeys ?? [], [screen])
 
+  // What the screen declares about its own shape: the bands it draws, and where each
+  // compiled field sits inside them. Both drive the placement choices in the editor.
+  const sections = useMemo(() => screen?.sections ?? [], [screen])
+  const compiledFields = useMemo(() => screen?.compiledFields ?? [], [screen])
+
   /**
    * The structure list: the compiled anchors first, then the tenant's own fields in their
    * configured order. Custom sequence numbers start above the compiled ones, so this is the
@@ -204,7 +249,7 @@ export default function FieldBuilderScreen() {
       mode: field ? 'edit' : 'add',
       form: field
         ? { ...BLANK_FIELD, ...field, maxLength: field.maxLength ?? '', roundTo: field.roundTo ?? '' }
-        : { ...BLANK_FIELD, screenKey, seqNo: 1000 + fields.length * 10 },
+        : { ...BLANK_FIELD, screenKey, seqNo: 1000 + fields.length * 10, sectionKey: '' },
     })
   }
 
@@ -283,7 +328,7 @@ export default function FieldBuilderScreen() {
   async function persistOrder(custom) {
     // The order is re-derived from the array rather than nudging one number, so a list that
     // has drifted out of step repairs itself the first time anything is moved.
-    const renumbered = custom.map((f, i) => ({ ...f, seqNo: 1000 + i * 10 }))
+    const renumbered = renumberBySection(custom, compiledFields)
     setFieldFetch({ screenKey, fields: renumbered })
 
     try {
@@ -813,6 +858,8 @@ export default function FieldBuilderScreen() {
           dataSources={dataSources}
           siblings={fields}
           anchors={anchors}
+          sections={sections}
+          compiledFields={compiledFields}
           busy={busy}
           errors={editorErrors}
           message={editorMessage}

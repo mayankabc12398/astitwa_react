@@ -19,6 +19,17 @@ export function NumberInput({ invalid = false, className = '', ...rest }) {
   return <input type="number" className={classFor('input', invalid, className)} aria-invalid={invalid || undefined} {...rest} />
 }
 
+export function CheckboxInput({ invalid = false, className = '', ...rest }) {
+  return (
+    <input
+      type="checkbox"
+      className={classFor('checkbox', invalid, className)}
+      aria-invalid={invalid || undefined}
+      {...rest}
+    />
+  )
+}
+
 export function TextArea({ invalid = false, className = '', rows = 3, ...rest }) {
   return (
     <textarea rows={rows} className={classFor('textarea', invalid, className)} aria-invalid={invalid || undefined} {...rest} />

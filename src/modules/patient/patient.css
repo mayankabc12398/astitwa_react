@@ -1,0 +1,180 @@
+/*
+ * Registration is a dense screen: seventy fields the front desk works through with a patient
+ * standing in front of them. Everything here is about fitting that on one page without it
+ * reading as a wall — banded sections, a tight grid, and the two small controls (the blue
+ * add button and the clear ✕) the design hangs off.
+ *
+ * Colours and spacing come from tokens.css. The two band colours are the only literals, and
+ * they are declared once, on .pf.
+ */
+
+.pf {
+  --pf-band-from: var(--c-primary-soft);
+  --pf-band-to: #cfe0fb;
+  --pf-band-text: #1c3f7c;
+}
+
+/* ---------- sections ---------- */
+
+.pf-card {
+  padding: 0;
+  margin-bottom: var(--s-4);
+  overflow: hidden;
+}
+
+.pf-section {
+  margin: 0;
+  padding: var(--s-3) var(--s-5);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--pf-band-text);
+  background: linear-gradient(180deg, var(--pf-band-from), var(--pf-band-to));
+  border-bottom: 2px solid var(--c-primary);
+}
+
+.pf-card > .pf-grid {
+  padding: var(--s-4) var(--s-5) var(--s-2);
+}
+
+.pf-card > .pf-scheme-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0 var(--s-5) var(--s-4);
+}
+
+.pf-card > .table-wrap {
+  margin: 0 var(--s-5) var(--s-5);
+}
+
+/* ---------- the grid ---------- */
+
+/*
+ * Five columns at desk width. auto-fit is not used on purpose: the fields are ordered by
+ * cfg_field_rule.seq_no, and a column count that changes with content would move a field
+ * a tenant deliberately placed.
+ */
+.pf-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0 var(--s-4);
+}
+
+.pf-grid .field {
+  margin-bottom: var(--s-3);
+}
+
+.pf-grid .field__label {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pf-grid .input,
+.pf-grid .select {
+  min-height: 32px;
+  padding: var(--s-1) var(--s-2);
+}
+
+@media (max-width: 1600px) {
+  .pf-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1280px) {
+  .pf-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .pf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .pf-grid {
+    grid-template-columns: 1fr;
+  }
+  /* A field asking for two columns has only one left to take. */
+  .pf-grid > div {
+    grid-column: auto !important;
+  }
+}
+
+/* ---------- the blue add button ---------- */
+
+.pf-addon {
+  display: flex;
+  align-items: stretch;
+  gap: var(--s-1);
+}
+
+.pf-addon > .input,
+.pf-addon > .select {
+  flex: 1;
+  min-width: 0;
+}
+
+.pf-addon__btn {
+  flex: 0 0 auto;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  font-size: var(--fs-lg);
+  line-height: 1;
+}
+
+/* ---------- the clear ✕ ---------- */
+
+.pf-clearable {
+  position: relative;
+  display: flex;
+}
+
+.pf-clearable > .select {
+  padding-right: var(--s-6);
+}
+
+.pf-clearable__x {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--c-text-faint);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+}
+
+.pf-clearable__x:hover {
+  background: var(--c-surface-alt);
+  color: var(--c-text);
+}
+
+/* ---------- read-only fields ---------- */
+
+/* Family Number and the dial codes are issued, not typed; the design greys them for it. */
+.pf-readonly,
+.pf .input[readonly] {
+  background: var(--c-surface-alt);
+  color: var(--c-text-muted);
+  cursor: default;
+}
+
+/* ---------- header actions ---------- */
+
+/* The same Save and Cancel sit at the top of a long form as well as the bottom of it. */
+.form-actions--inline {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}

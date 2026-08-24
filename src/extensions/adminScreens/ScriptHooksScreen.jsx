@@ -11,6 +11,7 @@ import { useUi } from '../../core/controls/uiContext.js'
 import { usePagedList } from '../../core/hooks/usePagedList.js'
 import { useBootstrap } from '../../config/ConfigContext.js'
 import { HookTargetPreview } from './HookTargetPreview.jsx'
+import { withClientFields } from './screenFieldCatalog.js'
 import { MonacoScriptEditor } from './MonacoScriptEditor.jsx'
 
 const BLANK = {
@@ -205,7 +206,10 @@ export default function ScriptHooksScreen() {
   // field — 'Gross CTC — on blur' rather than a hr.employee.field.<fieldKey>.onBlur
   // placeholder to hand-edit. With no page, the full flat list is offered exactly as before,
   // so a hook key outside the catalogue stays editable.
-  const screens = slots.screens ?? []
+  // This build's own field lists are unioned in, so a field added in a release the server's
+  // ScreenCatalog has not caught up with is still offered as a slot rather than needing its
+  // hook key typed by hand.
+  const screens = withClientFields(slots.screens ?? [])
   const screenKey = pickedScreen ?? screenKeyFor(editing?.hookKey, screens)
   const activeScreen = screens.find((screen) => screen.key === screenKey) ?? null
 

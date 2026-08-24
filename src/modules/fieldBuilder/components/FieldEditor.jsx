@@ -4,6 +4,7 @@ import { Badge, Field, Input, Modal, Select, SwitchField, Tabs, Textarea } from 
 import { OptionEditor } from './OptionEditor.jsx'
 import { SourceBinder } from './SourceBinder.jsx'
 import { BLANK_BINDING, DATA_SOURCES, LOOKUPS, RECALC_MODES, WIDTHS } from './fieldModel.js'
+import { AT_TOP, NEW_SECTION, currentAnchor, fieldsInSection, seqAfter, sectionOptions } from './placement.js'
 import { fieldBuilderApi } from '../fieldBuilderApi.js'
 
 /**
@@ -25,6 +26,8 @@ export function FieldEditor({
   dataSources,
   siblings,
   anchors,
+  sections = [],
+  compiledFields = [],
   busy = false,
   message,
   errors = {},
@@ -35,6 +38,44 @@ export function FieldEditor({
   const [tab, setTab] = useState('basics')
   const [test, setTest] = useState(null)
   const [testing, setTesting] = useState(false)
+
+  /*
+   * Placement.
+   *
+   * The section and the field it follows are the two things an author actually knows; the
+   * sequence number is derived from them and never typed. Both are held as local state
+   * because they are questions about the form, not columns on the field — what gets saved is
+   * sectionKey and the seqNo they produce.
+   */
+  const sectionChoices = sectionOptions(sections, siblings)
+  const [namingSection, setNamingSection] = useState(
+    Boolean(field.sectionKey) && !sectionChoices.some((c) => c.value === field.sectionKey),
+  )
+
+  const ordered = fieldsInSection(field.sectionKey, compiledFields, siblings, field.fieldId)
+  const [after, setAfter] = useState(() => currentAnchor(ordered, field.seqNo ?? 1000))
+
+  /** Moves the field, and takes the sequence number that puts it there. */
+  const placeAfter = (anchor, list = ordered) => {
+    setAfter(anchor)
+    set({ seqNo: seqAfter(list, anchor) })
+  }
+
+  /** A new section starts empty, so the field lands at the top of it either way. */
+  const chooseSection = (value) => {
+    if (value === NEW_SECTION) {
+      setNamingSection(true)
+      setAfter(AT_TOP)
+      onChange({ ...field, sectionKey: '', seqNo: 1000 })
+      return
+    }
+
+    setNamingSection(false)
+    const list = fieldsInSection(value, compiledFields, siblings, field.fieldId)
+    const last = list.length > 0 ? list[list.length - 1].fieldKey : AT_TOP
+    setAfter(last)
+    onChange({ ...field, sectionKey: value, seqNo: seqAfter(list, last) })
+  }
 
   const set = (patch) => onChange({ ...field, ...patch })
 
@@ -150,8 +191,48 @@ export function FieldEditor({
             <Select options={WIDTHS} value={field.width} onChange={(e) => set({ width: e.target.value })} />
           </Field>
 
-          <Field label="Section" help="Groups fields on the form. Optional.">
-            <Input value={field.sectionKey ?? ''} maxLength={80} onChange={(e) => set({ sectionKey: e.target.value })} />
+          <Field
+            label="Section"
+            help={namingSection ? 'The form draws a card of its own for it.' : 'The card this field is drawn inside.'}
+          >
+            <Select
+              options={[
+                { value: '', label: '— none —' },
+                ...sectionChoices,
+                { value: NEW_SECTION, label: '+ New section…' },
+              ]}
+              value={namingSection ? NEW_SECTION : (field.sectionKey ?? '')}
+              onChange={(e) => chooseSection(e.target.value)}
+            />
+          </Field>
+
+          {namingSection && (
+            <Field label="New section name" help="Fields added to it later can pick it from the list.">
+              <Input
+                value={field.sectionKey ?? ''}
+                maxLength={80}
+                autoFocus
+                placeholder="e.g. Consent"
+                onChange={(e) => set({ sectionKey: e.target.value })}
+              />
+            </Field>
+          )}
+
+          <Field
+            label="Place after"
+            help={`Renders at position ${field.seqNo ?? 1000}${ordered.length === 0 ? ' — first in this section' : ''}`}
+          >
+            <Select
+              options={[
+                { value: AT_TOP, label: 'At the top' },
+                ...ordered.map((f) => ({
+                  value: f.fieldKey,
+                  label: f.isCustom ? `${f.label} (added)` : f.label,
+                })),
+              ]}
+              value={after}
+              onChange={(e) => placeAfter(e.target.value)}
+            />
           </Field>
 
           <Field label="Placeholder">

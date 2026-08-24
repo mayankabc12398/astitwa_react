@@ -102,6 +102,18 @@
   background: var(--c-danger-soft);
 }
 
+.checkbox {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: var(--s-2) 0 0;
+  accent-color: var(--c-primary);
+}
+.checkbox--invalid {
+  outline: 2px solid var(--c-danger);
+  outline-offset: 2px;
+}
+
 /* ---------- table ---------- */
 .table-wrap {
   overflow-x: auto;
