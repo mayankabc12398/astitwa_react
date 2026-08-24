@@ -32,7 +32,7 @@ loader.config({ monaco })
 
 const LANGUAGE_LABELS = { javascript: 'JavaScript', mysql: 'MySQL' }
 
-export const DARK_THEME = 'hrsuite-dark'
+export const DARK_THEME = 'demo-hospital-dark'
 export const LIGHT_THEME = 'vs'
 
 /*
@@ -219,7 +219,7 @@ const EXPANDED = {
  * Read through try/catch: storage throws outright when a browser is set to block it, and an
  * editor that will not open because it could not read a colour preference is a poor trade.
  */
-const THEME_KEY = 'hrsuite.scriptEditor.theme'
+const THEME_KEY = 'demoHospital.scriptEditor.theme'
 
 function readStoredDark() {
   try {
@@ -494,7 +494,7 @@ export function MonacoScriptEditor({
             // must still open and still save - onMount runs inside React, so a throw here
             // unmounts the screen rather than degrading it.
             try {
-              javascriptDefaults.addExtraLib(CONTRACT, 'hrsuite-script-contract.d.ts')
+              javascriptDefaults.addExtraLib(CONTRACT, 'demo-hospital-script-contract.d.ts')
               javascriptDefaults.setDiagnosticsOptions({
                 noSemanticValidation: false,
                 noSyntaxValidation: false,

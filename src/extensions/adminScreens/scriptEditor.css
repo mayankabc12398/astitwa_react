@@ -544,7 +544,7 @@
  * inverted around one control would read as a rendering fault. So only the shell that frames
  * Monaco changes.
  *
- * These values are the ones the hrsuite-dark theme paints inside the editor: #282c34 for the
+ * These values are the ones the demo-hospital-dark theme paints inside the editor: #282c34 for the
  * text surface, #21252b for chrome around it, #181a1f for the rules. They have to be kept in
  * step with the `colors` block in MonacoScriptEditor.jsx, or a seam shows where the toolbar
  * meets the first line of the script.

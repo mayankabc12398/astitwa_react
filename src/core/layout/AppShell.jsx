@@ -32,7 +32,7 @@ export function AppShell() {
 
   return (
     <div className="app">
-      <div className="app__brand">HrSuite</div>
+      <div className="app__brand">Demo Hospital</div>
 
       <header className="app__header">
         <span className="app__tenant">{tenantName || user?.tenantCode}</span>

@@ -28,7 +28,7 @@ const locatorJsxPlugin = locatorJsxModule.default ?? locatorJsxModule
  */
 export function locatorJs() {
   return {
-    name: 'hrsuite:locatorjs',
+    name: 'demo-hospital:locatorjs',
     apply: 'serve',
     enforce: 'pre',
 

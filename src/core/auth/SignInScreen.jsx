@@ -29,7 +29,7 @@ export function SignInScreen() {
   return (
     <div className="signin">
       <form className="signin__card" onSubmit={onSubmit}>
-        <div className="signin__brand">HrSuite</div>
+        <div className="signin__brand">Demo Hospital</div>
         <p className="signin__tagline">Sign in to continue.</p>
 
         {error && <Alert tone="error">{error}</Alert>}

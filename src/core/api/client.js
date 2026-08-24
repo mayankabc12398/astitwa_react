@@ -9,7 +9,7 @@ import { ApiError } from './ApiError.js'
  */
 const BASE = (import.meta.env.VITE_API_BASE ?? '/api').replace(/\/+$/, '')
 
-const TOKEN_KEY = 'hrsuite.token'
+const TOKEN_KEY = 'demoHospital.token'
 
 let onUnauthorized = null
 
