@@ -36,5 +36,6 @@ registerRoutes([
 
 /** Called by the app once the bootstrap payload is known. */
 export function installClientScripts(scripts) {
+  console.log("installClientScripts",scripts)
   hookEngine.install(scripts ?? [])
 }

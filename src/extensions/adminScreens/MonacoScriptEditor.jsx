@@ -404,7 +404,9 @@ export function MonacoScriptEditor({
         >
           Comment
         </button>
-        <button
+        {/* AI assist is parked for now. Re-enable by uncommenting this button — the
+            assistant panel below still renders once `assistant` can be switched on. */}
+        {/* <button
           type="button"
           className="btn btn--ghost btn--sm"
           onClick={() => setAssistant((was) => !was)}
@@ -412,7 +414,7 @@ export function MonacoScriptEditor({
           title={assistant ? 'Hide the assistant' : 'Ask the assistant about this code'}
         >
           {assistant ? 'Hide AI' : 'AI'}
-        </button>
+        </button> */}
         <button
           type="button"
           className="btn btn--ghost btn--sm"

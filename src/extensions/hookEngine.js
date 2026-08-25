@@ -332,3 +332,4 @@ class HookEngine {
 }
 
 export const hookEngine = new HookEngine()
+console.log("hookEngine",hookEngine)
