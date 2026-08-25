@@ -1,0 +1,264 @@
+/*
+ * The Screen Field Builder. Two panes: what the screen is made of, and what that looks like.
+ *
+ * Everything here rides on the nhr design tokens the other configuration screens use, so the
+ * page belongs to the same product as the Field Builder beside it.
+ */
+
+.sf-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.sf-picker {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sf-picker .field {
+  min-width: 320px;
+  margin: 0;
+}
+
+.sf-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 6px;
+}
+
+/* The table being altered, named on the page rather than in a tooltip: it is the one fact an
+   author has to be sure of before they add anything. */
+.sf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface-2, #eef2ff);
+  color: var(--ink-2, #475569);
+  font-size: 12px;
+  font-family: 'Cascadia Mono', Consolas, monospace;
+}
+
+.sf-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .sf-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sf-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.sf-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+
+.sf-sub {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-3, #94a3b8);
+}
+
+/* ---------- structure list ---------- */
+
+.sf-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sf-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+}
+
+.sf-seq {
+  flex: 0 0 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2, #f1f5f9);
+  font-size: 11.5px;
+  color: var(--ink-2, #475569);
+}
+
+.sf-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-row__text strong {
+  display: block;
+  font-size: 13.5px;
+}
+
+.sf-req {
+  color: var(--danger, #dc2626);
+  margin-left: 3px;
+}
+
+.sf-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+.sf-meta code {
+  font-size: 11.5px;
+  color: var(--ink-3, #94a3b8);
+}
+
+.sf-row__actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---------- preview ---------- */
+
+.sf-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 16px;
+}
+
+.sf-pv {
+  position: relative;
+}
+
+.sf-pv--full {
+  grid-column: 1 / -1;
+}
+
+/* SYSTEM or CUSTOM, on the control rather than in a legend: which fields the product owns is
+   the question an author asks per field, not once per page. */
+.sf-pv__tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface-2, #f1f5f9);
+  color: var(--ink-3, #94a3b8);
+}
+
+.sf-pv:has(.sf-pv__tag) .field-label {
+  padding-right: 60px;
+}
+
+/* ---------- editor ---------- */
+
+.sf-placement {
+  border: 1px dashed var(--line, #e2e8f0);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  background: var(--surface-2, #f8fafc);
+}
+
+.sf-placement__label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3, #94a3b8);
+  margin-bottom: 6px;
+}
+
+.sf-placement__path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sf-crumb {
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #e2e8f0);
+  color: var(--ink-2, #475569);
+}
+
+.sf-crumb--anchor {
+  border-color: var(--primary, #6366f1);
+  color: var(--primary, #6366f1);
+}
+
+.sf-crumb--new {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+  color: #fff;
+}
+
+.sf-visibility {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* ---------- the wizard's review step ---------- */
+
+.sf-review section {
+  margin-top: 14px;
+}
+
+.sf-review h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--ink-2, #475569);
+}
+
+.sf-review dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+  margin: 0;
+}
+
+.sf-review dt {
+  font-size: 11.5px;
+  color: var(--ink-3, #94a3b8);
+}
+
+.sf-review dd {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

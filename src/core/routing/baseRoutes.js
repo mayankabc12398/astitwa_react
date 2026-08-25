@@ -100,5 +100,17 @@ export function registerBaseRoutes() {
       permission: 'admin.customField',
       load: () => import('../../modules/fieldBuilder/FieldBuilderScreen.jsx'),
     },
+    // The other field builder: these fields are columns on the screen's own table rather
+    // than values in rows, so it is guarded by a permission of its own.
+    {
+      path: '/hr/screen-fields',
+      permission: 'admin.fieldColumn',
+      load: () => import('../../modules/screenFields/ScreenFieldsScreen.jsx'),
+    },
+    {
+      path: '/hr/recruitment',
+      permission: 'hr.jobRequisition.view',
+      load: () => import('../../modules/recruitment/RecruitmentScreen.jsx'),
+    },
   ])
 }
